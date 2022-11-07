@@ -1,0 +1,6 @@
+title = "Glass Angel"
+author = "Jane Lewis"
+shortname = "jlewis"
+version = "0.1.0"
+support_email = "triangleland@proton.me"
+copyright_message = "Copyright © 2022 Jane Lewis."
