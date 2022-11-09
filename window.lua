@@ -1,6 +1,6 @@
 local Window = ...
 
-local aspectRatio = vec2(1920, 1080)
+local aspectRatio = vec2(1024, 1024)
 
 screenEdge = aspectRatio / 2
 

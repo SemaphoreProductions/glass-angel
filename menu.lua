@@ -66,7 +66,28 @@ function bounds(uppercenter, size, target)
 end
 
 function Menu:new()
+    print()
+    local images = {
+        am.scale(2) ^ am.sprite("assets/images/dot_eyes.png"),
+        am.scale(2) ^ am.sprite("assets/images/stone_angel.png"),
+        am.scale(2) ^ am.sprite("assets/images/rainbow.png"),
+        am.scale(2) ^ am.sprite("assets/images/sad_angel.png"),
+        am.scale(2) ^ am.sprite("assets/images/unnerving.png"),
+    }
+    local frames = 0
+
     local menu = am.group() ^ {
+        am.group():action(function(node)
+            if frames == 0 and node.num_children == 0 and math.random() < 0.05 then
+                table.shuffle(images)
+                node:append(images[1])
+                frames = 10
+            elseif frames == 0 then
+                node:remove_all()
+            else
+                frames = frames - 1
+            end
+        end),
         am.particles2d({
             source_pos = vec2(0, screenEdge.y + 100),
             source_pos_var = vec2(screenEdge.x * 2, 50),
@@ -93,9 +114,13 @@ function Menu:new()
             speed_var = 70,
             angle = math.rad(90)
         }),
-        am.translate(0, screenEdge.y / 2) ^ { yantiqLarge("Glass Angel", "center", "bottom"), am.translate(0, -96) ^ ned("Glass Angel", "center", "bottom") },
-        button("new game", 0),
-        button("load game", 1),
+        am.translate(0, screenEdge.y / 2) ^ 
+            { yantiqLarge("[glass angel]", "center", "bottom"), 
+            am.translate(0, -96) 
+                ^ ned("[glass angel]", "center", "bottom") 
+            },
+        button("start", 0),
+        button("level select", 1),
         button("settings", 2),
         button("credits", 3),
         button("quit", 4, function() globalWindow:close() end),
