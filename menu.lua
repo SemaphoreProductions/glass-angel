@@ -15,12 +15,8 @@ function text_node(text, halign, valign)
     return am.text(fonts.annapurnaRegular, text, textColor, halign, valign)
 end
 
-function yantiq(text, halign, valign)
-    return am.text(fonts.yantiq, text, textColor, halign, valign)
-end
-
-function yantiqLarge(text, halign, valign)
-    return am.text(fonts.yantiqLarge, text, highlightedTextColor, halign, valign)
+function large_text_node(text, halign, valign)
+    return am.text(fonts.annapurnaRegularLarge, text, highlightedTextColor, halign, valign)
 end
 
 function ned(text, halign, valign)
@@ -45,7 +41,7 @@ function dump(o)
 function button(text, offset, action)
     local buttonAction = action or __NULL__
     local uppercenter = vec2(0, -screenEdge.y / 5 * (offset or 0))
-    return am.translate(uppercenter.x, uppercenter.y) ^ yantiq(text):action(function(node)
+    return am.translate(uppercenter.x, uppercenter.y) ^ text_node(text):action(function(node)
         local mouse_pos = globalWindow:mouse_position()
         if bounds(uppercenter, vec2(node.width, textHeight), mouse_pos) then
             anima.tween(node, 0.5, { color = highlightedTextColor })
@@ -78,7 +74,7 @@ function Menu:new()
 
     local menu = am.group() ^ {
         am.group():action(function(node)
-            if frames == 0 and node.num_children == 0 and math.random() < 0.05 then
+            if frames == 0 and node.num_children == 0 and math.random() < 0.02 then
                 table.shuffle(images)
                 node:append(images[1])
                 frames = 10
@@ -88,42 +84,15 @@ function Menu:new()
                 frames = frames - 1
             end
         end),
-        am.particles2d({
-            source_pos = vec2(0, screenEdge.y + 100),
-            source_pos_var = vec2(screenEdge.x * 2, 50),
-            start_size = 3,
-            start_size_var = 1,
-            max_particles = 10000,
-            warmup_time = 40,
-            emission_rate = 40,
-            life = 1000,
-            speed = -200,
-            speed_var = 20,
-            angle = math.rad(90)
-        }),
-        am.particles2d({
-            source_pos = vec2(0, screenEdge.y + 100),
-            source_pos_var = vec2(screenEdge.x * 2, 50),
-            start_size = 3,
-            start_size_var = 1,
-            max_particles = 10000,
-            warmup_time = 40,
-            emission_rate = 10,
-            life = 1000,
-            speed = -100,
-            speed_var = 70,
-            angle = math.rad(90)
-        }),
         am.translate(0, screenEdge.y / 2) ^ 
-            { yantiqLarge("[glass angel]", "center", "bottom"), 
+            { large_text_node("[glass angel]", "center", "bottom"), 
             am.translate(0, -96) 
                 ^ ned("[glass angel]", "center", "bottom") 
             },
         button("start", 0),
-        button("level select", 1),
-        button("settings", 2),
-        button("credits", 3),
-        button("quit", 4, function() globalWindow:close() end),
+        button("settings", 1),
+        button("credits", 2),
+        button("quit", 3, function() globalWindow:close() end),
         am.group():action(am.play(audio.mainMenuMusic, true))
     }
 
