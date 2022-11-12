@@ -1,4 +1,5 @@
 assets = require "assets"
+character = require "character"
 
 local Window = require "window"
 local Menu = require "menu"
