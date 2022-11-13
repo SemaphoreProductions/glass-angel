@@ -9,16 +9,19 @@ function Character:new(name, sprite, moveset)
         sprite = sprite,
         moveset = moveset,
         speed = SPEED,
-        position = vec2(),
-        velocity = vec2()
+        position = vec2(0.0, 0.0),
+        velocity = vec2(0.0, 0.0)
     }
 
-    function character:handleInput(window)
-        for key in window:keys_down() do
-            if moveset[key] ~= nil then
-                velocity = velocity + speed * moveset[key]
+    function character:handleInput()
+        character.velocity = vec2(0.0, 0.0)
+        for _, key in ipairs(globalWindow:keys_down()) do
+            if character.moveset[key] ~= nil then
+                character.velocity = character.velocity + character.moveset[key]
+                print(character.velocity)
             end
         end
+        character.velocity = character.velocity * character.speed
     end
 
     return character
@@ -29,10 +32,11 @@ function Character:newNode(character)
         am.translate(character.position) ^ am.sprite(character.sprite)
     )
     
-    player:action(function (node, dt)
+    player:action(function (node)
+        character:handleInput()
         -- Handle velocity
-        character.position = character.position + character.velocity * dt
-        local translate = node:child_pairs()[1][2]
+        character.position = character.position + character.velocity * am.delta_time        
+        local translate = node:child(1)
         translate.position2d = character.position
     end)
 

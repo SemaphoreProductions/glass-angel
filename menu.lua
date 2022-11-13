@@ -4,6 +4,8 @@ local anima = require("anima")
 
 local audio = require("audio")
 
+local Game = require("game")
+
 local textHeight = 64
 
 local function __NULL__() end
@@ -46,7 +48,7 @@ function button(text, offset, action)
         if bounds(uppercenter, vec2(node.width, textHeight), mouse_pos) then
             anima.tween(node, 0.5, { color = highlightedTextColor })
             if globalWindow:mouse_pressed("left") then
-                node:append(am.group():action(am.play(audio.menuButtonClick, false, 0.65, 0.5)))
+                node:append(am.group():action(am.play(audio.menuButtonClick, false, 0.65, VOLUME * 0.5)))
                 buttonAction()
             end
         else
@@ -62,7 +64,6 @@ function bounds(uppercenter, size, target)
 end
 
 function Menu:new()
-    print()
     local images = {
         am.scale(2) ^ am.sprite("assets/images/dot_eyes.png"),
         am.scale(2) ^ am.sprite("assets/images/stone_angel.png"),
@@ -89,11 +90,13 @@ function Menu:new()
             am.translate(0, -96) 
                 ^ ned("[glass angel]", "center", "bottom") 
             },
-        button("start", 0),
+        button("start", 0, function() 
+            globalWindow.scene = Game:new()
+        end),
         button("settings", 1),
         button("credits", 2),
         button("quit", 3, function() globalWindow:close() end),
-        am.group():action(am.play(audio.mainMenuMusic, true))
+        am.group():action(am.play(audio.mainMenuMusic, true, nil, VOLUME))
     }
 
     menu:action(function(scene)
