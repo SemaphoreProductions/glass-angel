@@ -31,6 +31,8 @@ function Game:new()
     local score = 0
     local wave = 1
 
+    globalBumpWorld = bump.newWorld(16)
+
     local ava = Character:new("ava", avaicon, avaMoveset)
     local finch = Character:new("finch", finchicon, finchMoveset)
 

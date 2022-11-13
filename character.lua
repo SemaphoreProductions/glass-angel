@@ -27,15 +27,19 @@ function Character:new(name, sprite, moveset, position)
 end
 
 function Character:newNode(character)
-    local player = am.group(
-        am.translate(character.position) ^ am.sprite(character.sprite)
-    )
+    local player = am.translate(character.position) ^ am.sprite(character.sprite)
+
+    globalBumpWorld:add(character, character.position.x, character.position.y, 30, 30)
+
+    function character:die()
+        globalBumpWorld:removeItem()
+    end
     
     player:action(function (node)
         character:handleInput()
         -- Handle velocity
         character.position = character.position + character.velocity * am.delta_time        
-        local translate = node:child(1)
+        local translate = node"translate"
         translate.position2d = character.position
     end)
 
