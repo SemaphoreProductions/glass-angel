@@ -3,13 +3,13 @@ local Character = ...
 local SPEED = 10
 
 
-function Character:new(name, sprite, moveset)
+function Character:new(name, sprite, moveset, position)
     local character = {
         name = name,
         sprite = sprite,
         moveset = moveset,
         speed = SPEED,
-        position = vec2(0.0, 0.0),
+        position = position or vec2(0.0, 0.0),
         velocity = vec2(0.0, 0.0)
     }
 
@@ -18,7 +18,6 @@ function Character:new(name, sprite, moveset)
         for _, key in ipairs(globalWindow:keys_down()) do
             if character.moveset[key] ~= nil then
                 character.velocity = character.velocity + character.moveset[key]
-                print(character.velocity)
             end
         end
         character.velocity = character.velocity * character.speed
