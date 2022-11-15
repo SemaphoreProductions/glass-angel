@@ -71,18 +71,19 @@ function Menu:new()
         am.scale(2) ^ am.sprite("assets/images/sad_angel.png"),
         am.scale(2) ^ am.sprite("assets/images/unnerving.png"),
     }
-    local frames = 0
+
+    local time = 0.
 
     local menu = am.group() ^ {
         am.group():action(function(node)
-            if frames == 0 and node.num_children == 0 and math.random() < 0.02 then
+            if time <= 0 and node.num_children == 0 and math.random() < am.delta_time then
                 table.shuffle(images)
                 node:append(images[1])
-                frames = 10
-            elseif frames == 0 then
+                time = 0.1
+            elseif time <= 0 then
                 node:remove_all()
             else
-                frames = frames - 1
+                time = time - am.delta_time
             end
         end),
         am.translate(0, screenEdge.y / 2) ^ 

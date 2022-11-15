@@ -37,8 +37,8 @@ function Game:new()
     local finch = Character:new("finch", finchicon, finchMoveset)
 
     local game = am.group() ^ {
-        am.scale(30) ^ Character:newNode(ava),
-        am.scale(30) ^ Character:newNode(finch)
+        am.scale(15) ^ Character:newNode(ava),
+        am.scale(15) ^ Character:newNode(finch)
     }
     
 
