@@ -1,6 +1,6 @@
 local audio = ...
 
-VOLUME = 0.5
+VOLUME = 0.0
 
 audio.mainMenuMusic = am.load_audio("assets/audio/mainmenuidea.ogg")
 

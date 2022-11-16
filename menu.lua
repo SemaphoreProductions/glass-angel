@@ -1,5 +1,7 @@
 local Menu = ...
 
+local bg = require 'bg'
+
 local anima = require("anima")
 
 local audio = require("audio")
@@ -10,7 +12,7 @@ local textHeight = 64
 
 local function __NULL__() end
 
-local textColor = vec4(0.5, 0.5, 0.5, 1)
+local textColor = vec4(0.8, 0.8, 0.8, 1)
 local highlightedTextColor = vec4(1, 1, 1, 1)
 
 function text_node(text, halign, valign)
@@ -75,6 +77,7 @@ function Menu:new()
     local time = 0.
 
     local menu = am.group() ^ {
+        bg.scrolling,
         am.group():action(function(node)
             if time <= 0 and node.num_children == 0 and math.random() < am.delta_time then
                 table.shuffle(images)

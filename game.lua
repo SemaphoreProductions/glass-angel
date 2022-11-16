@@ -1,5 +1,6 @@
 local Game = ...
 local Character = require 'character'
+local bg = require 'bg'
 
 local avaicon = [[
     YYY
@@ -37,6 +38,7 @@ function Game:new()
     local finch = Character:new("finch", finchicon, finchMoveset)
 
     local game = am.group() ^ {
+        bg.scrolling,
         am.scale(15) ^ Character:newNode(ava),
         am.scale(15) ^ Character:newNode(finch)
     }
