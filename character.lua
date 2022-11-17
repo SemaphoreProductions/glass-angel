@@ -1,16 +1,19 @@
 local Character = ...
 
 local SPEED = 300
+local RADIUS = 2
 
 
 function Character:new(name, sprite, moveset, position)
     local character = {
         name = name,
         sprite = sprite,
+        radius = RADIUS,
         moveset = moveset,
         speed = SPEED,
         position = position or vec2(0.0, 0.0),
-        velocity = vec2(0.0, 0.0)
+        velocity = vec2(0.0, 0.0),
+        dead = false
     }
 
     function character:handleInput()
@@ -28,12 +31,6 @@ end
 
 function Character:newNode(character)
     local player = am.translate(character.position) ^ character.sprite
-
-    globalBumpWorld:add(character, character.position.x, character.position.y, 30, 30)
-
-    function character:die()
-        globalBumpWorld:removeItem()
-    end
     
     player:action(function (node)
         character:handleInput()
