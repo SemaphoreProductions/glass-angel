@@ -50,7 +50,7 @@ function button(text, offset, action)
         if bounds(uppercenter, vec2(node.width, textHeight), mouse_pos) then
             anima.tween(node, 0.5, { color = highlightedTextColor })
             if globalWindow:mouse_pressed("left") then
-                node:append(am.group():action(am.play(audio.menuButtonClick, false, 0.65, VOLUME * 0.5)))
+                node:append(am.group():action(am.play(audio.menuButtonClick, false, 0.65, VOLUME)))
                 buttonAction()
             end
         else
@@ -66,29 +66,9 @@ function bounds(uppercenter, size, target)
 end
 
 function Menu:new()
-    local images = {
-        am.scale(2) ^ am.sprite("assets/images/dot_eyes.png"),
-        am.scale(2) ^ am.sprite("assets/images/stone_angel.png"),
-        am.scale(2) ^ am.sprite("assets/images/rainbow.png"),
-        am.scale(2) ^ am.sprite("assets/images/sad_angel.png"),
-        am.scale(2) ^ am.sprite("assets/images/unnerving.png"),
-    }
-
-    local time = 0.
 
     local menu = am.group() ^ {
         bg.scrolling,
-        am.group():action(function(node)
-            if time <= 0 and node.num_children == 0 and math.random() < am.delta_time then
-                table.shuffle(images)
-                node:append(images[1])
-                time = 0.1
-            elseif time <= 0 then
-                node:remove_all()
-            else
-                time = time - am.delta_time
-            end
-        end),
         am.translate(0, screenEdge.y / 2) ^ 
             { large_text_node("[glass angel]", "center", "bottom"), 
             am.translate(0, -96) 

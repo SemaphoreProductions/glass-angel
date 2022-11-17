@@ -1,6 +1,6 @@
 local Character = ...
 
-local SPEED = 10
+local SPEED = 300
 
 
 function Character:new(name, sprite, moveset, position)
@@ -27,7 +27,7 @@ function Character:new(name, sprite, moveset, position)
 end
 
 function Character:newNode(character)
-    local player = am.translate(character.position) ^ am.sprite(character.sprite)
+    local player = am.translate(character.position) ^ character.sprite
 
     globalBumpWorld:add(character, character.position.x, character.position.y, 30, 30)
 

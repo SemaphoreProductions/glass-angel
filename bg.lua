@@ -19,12 +19,13 @@ local vert_shader = [[
 
 local frag_shader = [[
     precision mediump float;
+    #define BRIGHTNESS 0.5
     uniform sampler2D tex;
     varying vec2 v_uv;
     uniform float scrollFactor;
     void main() {
         vec2 uv = vec2(v_uv.x, v_uv.y + scrollFactor);
-        gl_FragColor = texture2D(tex, uv);
+        gl_FragColor = texture2D(tex, uv) * BRIGHTNESS;
     }
 ]]
 

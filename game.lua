@@ -1,12 +1,7 @@
 local Game = ...
 local Character = require 'character'
 local bg = require 'bg'
-
-local avaicon = [[
-    YYY
-    YYY
-    YYY
-]]
+local anima = require 'anima'
 
 local finchicon = [[
     BBB
@@ -28,19 +23,47 @@ finchMoveset = {
     ["s"]  = vec2(0.0, -1.0)
 }
 
+local idleAnimation = {
+    { row = 2, col = 1 },
+    { row = 2, col = 2 },
+    { row = 2, col = 3 },
+    { row = 2, col = 4 },
+    { row = 2, col = 5 },
+    { row = 2, col = 6 },
+    { row = 2, col = 7 },
+    { row = 2, col = 8 },
+    { row = 2, col = 9 },
+    { row = 2, col = 10 },
+    { row = 2, col = 11 },
+    { row = 2, col = 12 },
+    { row = 2, col = 13 },
+    { row = 2, col = 14 },
+    nil
+}
+
 function Game:new()
     local score = 0
     local wave = 1
 
     globalBumpWorld = bump.newWorld(16)
 
-    local ava = Character:new("ava", avaicon, avaMoveset)
-    local finch = Character:new("finch", finchicon, finchMoveset)
+    local ava = Character:new("ava", anima.te({
+        file = "assets/sprite/blue_angel.png",
+        width = 128,
+        height = 192,
+        fps = 12.0
+    }, idleAnimation), avaMoveset)
+    local finch = Character:new("finch", anima.te({
+        file = "assets/sprite/red_angel.png",
+        width = 128,
+        height = 192,
+        fps = 12.0
+    }, idleAnimation), finchMoveset)
 
     local game = am.group() ^ {
         bg.scrolling,
-        am.scale(15) ^ Character:newNode(ava),
-        am.scale(15) ^ Character:newNode(finch)
+        Character:newNode(ava),
+        Character:newNode(finch)
     }
     
 
