@@ -9,26 +9,15 @@ function Projectile:shootAt(me, other, speed)
     end
 end
 
-function Projectile:newBullet(sprite, position, behavior)
-    return am.translate(position):tag("bullet"):action(behavior) ^ am.sprite(sprite)
-end
-
-
-function Projectile:newBulletFactory(sprite)
-    local factory = {}
-    function factory:fire(scene, position, pattern, behavior)
-        for _, instance in pattern do
-            scene:append(Projectile:newBullet(sprite, position - instance.position or vec2(0., 0.), behavior))
-        end
-    end
-    return factory
+function Projectile:newBullet(sprite, position, rotation, behavior)
+    return am.translate(position):tag("bullet"):action(behavior) ^ am.rotate(rotation) ^ am.sprite(sprite)
 end
 
 function Projectile:newPlayerBulletFactory(sprite, angle, speed)
     local factory = {}
     local velocity = vec2(math.cos(angle), math.sin(angle)) * speed
     function factory:fire(scene, position)
-        scene:append(Projectile:newBullet(sprite, position, function(node)
+        scene:append(Projectile:newBullet(sprite, position, angle, function(node)
             if node.position2d.x > screenEdge.x or node.position2d.x < -screenEdge.x
                 or node.position2d.y > screenEdge.y or node.position2d.y < -screenEdge.y then
                 scene:remove(node)

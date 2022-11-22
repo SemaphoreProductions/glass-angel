@@ -3,6 +3,8 @@ local Character = require 'character'
 local bg = require 'bg'
 local anima = require 'anima'
 local Projectile = require 'projectile'
+local script = require 'script'
+local Reader = require 'reader'
 
 local finchicon = [[
     BBB
@@ -43,13 +45,7 @@ local idleAnimation = {
 
 local fire = "space"
 
-local bullet = [[
-    WWWWW
-    WWWWW
-    WWWWW
-    WWWWW
-    WWWWW
-]]
+local bullet = "assets/sprite/angel_bullet.png"
 
 local playerBulletFactory = Projectile:newPlayerBulletFactory(bullet, math.rad(90), 700)
 
@@ -61,9 +57,10 @@ local elapsed = 0.0
 
 function update_players(scene, players)
     local fired = false
+    local curtain = scene"bullet-curtain"
     for _, player in ipairs(players) do
         if elapsed > lastprimaryFire + primaryCooldown then
-            playerBulletFactory:fire(scene, player.position)
+            playerBulletFactory:fire(curtain, player.position)
             fired = true
         end
     end
@@ -72,9 +69,12 @@ function update_players(scene, players)
     end
 end
 
+
 function Game:new()
     local score = 0
     local wave = 1
+
+    local reader = Reader.new(script)
 
     local finch = Character:new("finch", anima.te({
         file = "assets/sprite/red_angel.png",
@@ -91,6 +91,8 @@ function Game:new()
 
     local game = am.group() ^ {
         bg.scrolling,
+        am:group():tag("theater"),
+        am:group():tag("bullet-curtain"),
         Character:newNode(ava),
         Character:newNode(finch)
     }
@@ -100,6 +102,7 @@ function Game:new()
     game:action(function(scene)
         elapsed = elapsed + am.delta_time
         update_players(scene, {ava, finch})
+        reader:update(scene)
     end)
 
     return game

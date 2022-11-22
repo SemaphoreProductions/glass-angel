@@ -1,6 +1,6 @@
 local audio = ...
 
-VOLUME = 0.0
+VOLUME = 0.1
 
 audio.mainMenuMusic = am.load_audio("assets/audio/proofofconcept.ogg")
 
