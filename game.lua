@@ -5,6 +5,8 @@ local anima = require 'anima'
 local Projectile = require 'projectile'
 local script = require 'script'
 local Reader = require 'reader'
+local audio = require 'audio'
+local Enemy = require 'enemy'
 
 local finchicon = [[
     BBB
@@ -47,7 +49,7 @@ local fire = "space"
 
 local bullet = "assets/sprite/angel_bullet.png"
 
-local playerBulletFactory = Projectile:newPlayerBulletFactory(bullet, math.rad(90), 700)
+local playerBulletFactory = Projectile:newPlayerBulletFactory(bullet, math.rad(90), 700, "playerBullet")
 
 local primaryCooldown = 0.2
 
@@ -91,7 +93,7 @@ function Game:new()
 
     local game = am.group() ^ {
         bg.scrolling,
-        am:group():tag("theater"),
+        am:group():tag("theater") ^ am.group():tag"continue",
         am:group():tag("bullet-curtain"),
         Character:newNode(ava),
         Character:newNode(finch)
@@ -99,10 +101,13 @@ function Game:new()
     
 
     -- main game loop
-    game:action(function(scene)
+    game:action(am.parallel({am.play(audio.stage1, true, nil, VOLUME), function(scene)
         elapsed = elapsed + am.delta_time
         update_players(scene, {ava, finch})
         reader:update(scene)
+    end}))
+    :action("enemyUpdate", function(scene)
+        Enemy.dieOnHit(scene"theater", scene"bullet-curtain")
     end)
 
     return game
