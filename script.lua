@@ -32,9 +32,10 @@ end
 
 local minionBulletFactory = Projectile:newPlayerBulletFactory("assets/sprite/angel_bullet.png", math.rad(270), 600)
 
-local minion = function() return Enemy.minion(minion, vec2(0, screenEdge), nil, move_and_then(vec2(0, -100), repeat_every(math.random() * 2 + 1.3, function(enemy)
-    minionBulletFactory:fire(enemy, vec2(0, 0))
-end))) end
+local zoomer = function(scene) local time = am.frame_time return Enemy.minion(minion, nil, move_and_then(vec2(0, -600), function(enemy)
+    --minionBulletFactory:fire(scene"enemy-curtain", enemy.position2d)
+    enemy.position2d = enemy.position2d{ x = math.sin(am.frame_time + time) * screenEdge.x / 2}
+end)) end
 
 local function display_title(scene, text)
     local FONT = 50
@@ -63,8 +64,8 @@ return {
             end),
             coroutine.create(function(scene)
                 while true do
-                    scene:append(minion():spawn_random_top())
-                    am.wait(am.delay(0.25))
+                    scene"enemies":append(zoomer(scene):spawn_top(math.sin(am.frame_time * 5) * 100))
+                    am.wait(am.delay(0.5))
                 end
             end)
         }

@@ -1,6 +1,6 @@
 local Character = ...
 
-local SPEED = 300
+local SPEED = 600
 local RADIUS = 2
 
 

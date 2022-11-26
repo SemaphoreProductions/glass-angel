@@ -93,8 +93,12 @@ function Game:new()
 
     local game = am.group() ^ {
         bg.scrolling,
-        am:group():tag("theater") ^ am.group():tag"continue",
-        am:group():tag("bullet-curtain"),
+        am.group():tag"theater" ^ {
+            am.group():tag("enemy-curtain"),
+            am.group():tag("bullet-curtain"),
+            am.group():tag("enemies"),
+            am.group():tag"continue",
+        },
         Character:newNode(ava),
         Character:newNode(finch)
     }
@@ -107,7 +111,7 @@ function Game:new()
         reader:update(scene)
     end}))
     :action("enemyUpdate", function(scene)
-        Enemy.dieOnHit(scene"theater", scene"bullet-curtain")
+        Enemy.dieOnHit(scene"enemies", scene"bullet-curtain")
     end)
 
     return game

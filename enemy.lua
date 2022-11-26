@@ -4,12 +4,14 @@ local Projectile = require 'projectile'
 
 function Enemy.shootAtPlayer() end
 
-function Enemy.minion(sprite, position, rotation, behavior)
+function Enemy.minion(sprite, rotation, behavior)
     local minion = {}
 
-    function minion:spawn_random_top()
-        position = position{x = (math.random() - 0.5) * screenEdge.x * 2}
-        return am.translate(position):action(behavior):tag"enemy" 
+    function minion:spawn_top(x)
+        local position = vec2(x, screenEdge.y + 100)
+        return am.translate(position)
+        :action(behavior)
+        :tag"enemy" 
         ^ am.rotate(rotation or 0) 
         ^ am.scale(5)
         ^ am.sprite(sprite)
@@ -25,16 +27,18 @@ end
 --- AAAA stupid local transforms make everything miserable
 function Enemy.dieOnHit(theater, curtain)
     for _, enemy in ipairs(theater:all"enemy") do
-        -- Check for collision
+        if enemy.position2d.y < screenEdge.y then
+                    -- Check for collision
         -- Ouch, O(n^2) is the best we can do?
         for _, bullet in ipairs(curtain:all"playerBullet") do
             -- Check translation
             -- find a better way to get enemy size
-            if Enemy.bounds(bullet.position2d, vec2(30, 30), enemy.position2d) then
+            if Enemy.bounds(bullet.position2d, vec2(55, 55), enemy.position2d) then
                 -- kaboom!
                 theater:remove(enemy)
                 curtain:remove(bullet)
             end
+        end
         end
     end
 end
