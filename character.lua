@@ -4,7 +4,7 @@ local SPEED = 600
 local RADIUS = 2
 
 
-function Character:new(name, sprite, moveset, position)
+function Character:new(name, sprite, moveset, position, bcenter, bsize)
     local character = {
         name = name,
         sprite = sprite,
@@ -13,7 +13,9 @@ function Character:new(name, sprite, moveset, position)
         speed = SPEED,
         position = position or vec2(0.0, 0.0),
         velocity = vec2(0.0, 0.0),
-        dead = false
+        dead = false,
+        bcenter = bcenter,
+        bsize = bsize
     }
 
     function character:handleInput()
@@ -35,7 +37,10 @@ function Character:newNode(character)
     player:action(function (node)
         character:handleInput()
         -- Handle velocity
-        character.position = character.position + character.velocity * am.delta_time        
+        local newPos = character.position + character.velocity * am.delta_time
+        if check_bounds(character.bcenter, character.bsize, newPos) then
+            character.position = newPos     
+        end
         local translate = node"translate"
         translate.position2d = character.position
     end)

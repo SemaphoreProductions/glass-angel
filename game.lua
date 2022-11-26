@@ -83,13 +83,13 @@ function Game:new()
         width = 128,
         height = 192,
         fps = 12.0
-    }, idleAnimation), finchMoveset, vec2(-300, -250))
+    }, idleAnimation), finchMoveset, vec2(-300, -250), vec2(-screenEdge.x / 2, 0), screenEdge{ y = screenEdge.y * 2})
     local ava = Character:new("ava", anima.te({
         file = "assets/sprite/blue_angel.png",
         width = 128,
         height = 192,
         fps = 12.0
-    }, idleAnimation), avaMoveset, vec2(300, -250))
+    }, idleAnimation), avaMoveset, vec2(300, -250), vec2(screenEdge.x / 2, 0), screenEdge{ y = screenEdge.y * 2})
 
     local game = am.group() ^ {
         bg.scrolling,

@@ -32,18 +32,21 @@ end
 
 local minionBulletFactory = Projectile:newPlayerBulletFactory("assets/sprite/angel_bullet.png", math.rad(270), 600)
 
-local zoomer = function(scene) local time = am.frame_time return Enemy.minion(minion, nil, move_and_then(vec2(0, -600), function(enemy)
-    --minionBulletFactory:fire(scene"enemy-curtain", enemy.position2d)
-    enemy.position2d = enemy.position2d{ x = math.sin(am.frame_time + time) * screenEdge.x / 2}
+local zoomer = function(scene, xfunc) local time = am.frame_time return Enemy.minion(minion, nil, move_and_then(vec2(0, -600), function(enemy)
+    enemy.position2d = enemy.position2d{ x = xfunc(time)}
 end)) end
 
-local function display_title(scene, text)
-    local FONT = 50
-    scene:append(am.text(fonts.annapurnaBoldLarge, text):tag"title")
+local shooter = function(scene) 
+
+end
+
+local function display_title(scene, text, scale)
+    local size = scale or 1
+    scene:append(am.scale(size):tag"title" ^ am.text(fonts.annapurnaBoldLarge, text))
 end
 
 local function fade_title(scene, fade_time)
-    local title = scene"title"
+    local title = scene"title":child(1)
     return am.tween(title, fade_time, {
             color = vec4(title.color.x, title.color.y, title.color.z, 0)
         }
@@ -63,10 +66,16 @@ return {
                 scene:append(am:group():tag"continue")
             end),
             coroutine.create(function(scene)
-                while true do
-                    scene"enemies":append(zoomer(scene):spawn_top(math.sin(am.frame_time * 5) * 100))
+                local i = 60
+                while i > 0 do
+                    scene"enemies":append(zoomer(scene, function(time) return math.sin(am.frame_time + time) * screenEdge.x / 2 end):spawn_top(0))
                     am.wait(am.delay(0.5))
+                    i = i - 1
                 end
+                scene:append(am:group():tag"continue")
+            end),
+            coroutine.create(function(scene)
+                display_title(scene, "Thanks for Playing!", 0.8)
             end)
         }
     },

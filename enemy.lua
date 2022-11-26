@@ -20,7 +20,7 @@ function Enemy.minion(sprite, rotation, behavior)
     return minion
 end
 
-function Enemy.bounds(center, size, target)
+function check_bounds(center, size, target)
     return target.x < center.x + size.x/2 and target.x > center.x - size.x/2 and target.y < center.y + size.y/2 and target.y > center.y - size.y/2
 end
 
@@ -33,7 +33,7 @@ function Enemy.dieOnHit(theater, curtain)
         for _, bullet in ipairs(curtain:all"playerBullet") do
             -- Check translation
             -- find a better way to get enemy size
-            if Enemy.bounds(bullet.position2d, vec2(55, 55), enemy.position2d) then
+            if check_bounds(bullet.position2d, vec2(55, 55), enemy.position2d) then
                 -- kaboom!
                 theater:remove(enemy)
                 curtain:remove(bullet)
