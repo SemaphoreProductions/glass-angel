@@ -15,7 +15,10 @@ function Character:new(name, sprite, moveset, position, bcenter, bsize)
         velocity = vec2(0.0, 0.0),
         dead = false,
         bcenter = bcenter,
-        bsize = bsize
+        bsize = bsize,
+        shouldFire = false,
+        readyToFire = true,
+        awaiting = false,
     }
 
     function character:handleInput()
@@ -32,7 +35,7 @@ function Character:new(name, sprite, moveset, position, bcenter, bsize)
 end
 
 function Character:newNode(character)
-    local player = am.translate(character.position) ^ character.sprite
+    local player = am.translate(character.position):tag(character.name) ^ character.sprite
     
     player:action(function (node)
         character:handleInput()

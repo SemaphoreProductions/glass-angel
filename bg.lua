@@ -1,6 +1,6 @@
 local bg = ...
 
-bg.texture = am.texture2d("assets/images/background.png")
+bg.texture = am.texture2d("assets/images/stage1finished.png")
 
 bg.texture.twrap = "repeat"
 
@@ -32,7 +32,7 @@ local frag_shader = [[
 
 bg.scrollingShader = am.program(vert_shader, frag_shader)
 
-bg.scrollSpeed = 0.5
+bg.scrollSpeed = 0.25
 
 bg.scrolling = am.use_program(bg.scrollingShader)
 ^ am.bind{

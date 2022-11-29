@@ -1,10 +1,9 @@
 assets = require "assets"
-bump = require "lib.bump"
 
 local Window = require "window"
 globalWindow = Window:new()
 
---local Menu = require "menu"
+local Menu = require "menu"
 
 local Game = require "game"
 

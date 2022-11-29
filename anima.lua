@@ -43,7 +43,7 @@ function anima.te(spritesheet, frames)
 
     local anim = am.scale(vec2(1., 1.)):action(function(node)
         node.elapsed = node.elapsed + am.delta_time
-        local frame = math.floor(node.elapsed * fps) % animlength
+        local frame = math.floor(node.elapsed * fps) % animlength + 1
         local sprite = nil
         for _, seq in ipairs(sequence) do
             if frame <= seq.at then

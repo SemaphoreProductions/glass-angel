@@ -1,5 +1,7 @@
 local Projectile = ...
 
+local Enemy = require 'enemy'
+
 
 
 function Projectile:shootAt(me, other, speed)
@@ -10,21 +12,54 @@ function Projectile:shootAt(me, other, speed)
 end
 
 function Projectile:newBullet(sprite, position, rotation, behavior, tagname)
-    return am.translate(position):tag(tagname):action(behavior) ^ am.rotate(rotation) ^ am.sprite(sprite)
+    return am.translate(position)
+    :tag(tagname)
+    :action(behavior) 
+    ^ am.rotate(rotation) 
+    ^ am.sprite(sprite)
 end
 
-function Projectile:newPlayerBulletFactory(sprite, angle, speed, tagname)
+function Projectile:newBulletFactory(sprite, angle, speed, shootPlayer, tagname)
     local tagname = tagname or "bullet"
+    local shootPlayer = (shootPlayer ~= false)
     local factory = {}
-    local velocity = vec2(math.cos(angle), math.sin(angle)) * speed
     function factory:fire(scene, position)
-        scene:append(Projectile:newBullet(sprite, position, angle, function(node)
+        local shootAngle = math.rad(angle)
+        if shootPlayer then
+            shootAngle = shootAngle + Enemy.shootAtPlayer(scene, position)
+        end
+        local velocity = vec2(math.cos(shootAngle), math.sin(shootAngle)) * speed
+        scene:append(Projectile:newBullet(sprite, position, shootAngle, function(node)
             if node.position2d.x > screenEdge.x*2 or node.position2d.x < -screenEdge.x*2
                 or node.position2d.y > screenEdge.y*2 or node.position2d.y < -screenEdge.y*2 then
                 scene:remove(node)
             end
             node.position2d = node.position2d + am.delta_time * velocity
         end, tagname))
+    end
+    
+    return factory
+end
+
+function Projectile:newMultishotBulletFactory(sprite, angles, speed, shootPlayer, tagname)
+    local tagname = tagname or "bullet"
+    local shootPlayer = (shootPlayer ~= false)
+    local factory = {}
+    function factory:fire(scene, position)
+        for _, angle in ipairs(angles) do
+            local shootAngle = math.rad(angle)
+            if shootPlayer then
+                shootAngle = shootAngle + Enemy.shootAtPlayer(scene, position)
+            end
+            local velocity = speed * vec2(math.cos(shootAngle), math.sin(shootAngle))
+            scene:append(Projectile:newBullet(sprite, position, shootAngle, function(node)
+                if node.position2d.x > screenEdge.x*2 or node.position2d.x < -screenEdge.x*2
+                    or node.position2d.y > screenEdge.y*2 or node.position2d.y < -screenEdge.y*2 then
+                    scene:remove(node)
+                end
+                node.position2d = node.position2d + am.delta_time * velocity
+            end, tagname))
+        end
     end
     
     return factory

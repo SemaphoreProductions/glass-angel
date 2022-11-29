@@ -9,11 +9,10 @@ function Reader.new(script)
     }
     
     function reader:update(scene)
-        if scene("theater")("continue") ~= nil then
-            print(reader.item, reader.scene)
+        if scene("continue") ~= nil then
             local current_scene = script[reader.item].scenes[reader.scene]
-            scene"theater":remove("continue")
-            scene"theater":action(current_scene)
+            scene:remove("continue")
+            scene:action("script", current_scene)
             if #reader.script[reader.item].scenes < reader.scene + 1 then
                 reader.item = reader.item + 1 
             else
