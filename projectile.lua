@@ -19,7 +19,7 @@ function Projectile:newBullet(sprite, position, rotation, behavior, tagname)
     ^ am.sprite(sprite)
 end
 
-function Projectile:newBulletFactory(sprite, angle, speed, shootPlayer, tagname)
+function Projectile:newBulletFactory(curtain, sprite, angle, speed, shootPlayer, tagname)
     local tagname = tagname or "bullet"
     local shootPlayer = (shootPlayer ~= false)
     local factory = {}
@@ -29,7 +29,7 @@ function Projectile:newBulletFactory(sprite, angle, speed, shootPlayer, tagname)
             shootAngle = shootAngle + Enemy.shootAtPlayer(scene, position)
         end
         local velocity = vec2(math.cos(shootAngle), math.sin(shootAngle)) * speed
-        scene:append(Projectile:newBullet(sprite, position, shootAngle, function(node)
+        curtain:append(Projectile:newBullet(sprite, position, shootAngle, function(node)
             if node.position2d.x > screenEdge.x*2 or node.position2d.x < -screenEdge.x*2
                 or node.position2d.y > screenEdge.y*2 or node.position2d.y < -screenEdge.y*2 then
                 scene:remove(node)
@@ -41,7 +41,7 @@ function Projectile:newBulletFactory(sprite, angle, speed, shootPlayer, tagname)
     return factory
 end
 
-function Projectile:newMultishotBulletFactory(sprite, angles, speed, shootPlayer, tagname)
+function Projectile:newMultishotBulletFactory(curtain, sprite, angles, speed, shootPlayer, tagname)
     local tagname = tagname or "bullet"
     local shootPlayer = (shootPlayer ~= false)
     local factory = {}
@@ -52,7 +52,7 @@ function Projectile:newMultishotBulletFactory(sprite, angles, speed, shootPlayer
                 shootAngle = shootAngle + Enemy.shootAtPlayer(scene, position)
             end
             local velocity = speed * vec2(math.cos(shootAngle), math.sin(shootAngle))
-            scene:append(Projectile:newBullet(sprite, position, shootAngle, function(node)
+            curtain:append(Projectile:newBullet(sprite, position, shootAngle, function(node)
                 if node.position2d.x > screenEdge.x*2 or node.position2d.x < -screenEdge.x*2
                     or node.position2d.y > screenEdge.y*2 or node.position2d.y < -screenEdge.y*2 then
                     scene:remove(node)

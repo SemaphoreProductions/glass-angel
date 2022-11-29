@@ -5,12 +5,15 @@ local Projectile = require 'projectile'
 function Enemy.shootAtPlayer(scene, position) 
     -- shoot at player on our side of the screen
     local player
-    if position.x > 0 then
-        -- Shoot at finch
+    if position.x > 0 and scene"ava" ~= nil then
+        -- Shoot at ava
         player = scene"ava"
-    else
-        -- Shoot at Ava
+    elseif scene"finch" ~= nil then 
+        -- Shoot at finch
         player = scene"finch"
+    else
+        print("Game over!")
+        return 0
     end
     -- calc relative vector
     local rel = player.position2d - position
@@ -54,7 +57,7 @@ function Enemy.minion(scene, sprite, rotation, behavior, health, score, invulnTi
 end
 
 function check_bounds(center, size, target)
-    return target.x < center.x + size.x/2 and target.x > center.x - size.x/2 and target.y < center.y + size.y/2 and target.y > center.y - size.y/2
+    return target.x <= center.x + size.x/2 and target.x >= center.x - size.x/2 and target.y <= center.y + size.y/2 and target.y >= center.y - size.y/2
 end
 
 local hurt = am.sfxr_synth(20560004)

@@ -32,16 +32,16 @@ end
 
 local zoomer = function(scene, xfunc) local time = am.frame_time return Enemy.minion(scene, minion, nil, move_and_then(vec2(0, -600), function(enemy)
     enemy.position2d = enemy.position2d{ x = xfunc(time)}
-end)) end
+end, 2)) end
 
 
 local shooter_bullet = "assets/sprite/shooter_bullet.png"
 
 local shooter = function(scene, xvel)
-    local factory = Projectile:newMultishotBulletFactory(shooter_bullet, {-10, -5, 0, 5, 10}, 400)
+    local factory = Projectile:newMultishotBulletFactory(scene"enemy-curtain", shooter_bullet, {-10, -5, 0, 5, 10}, 400)
     return Enemy.minion(scene, minion, nil, move_and_then(vec2(xvel, -200), repeat_every(2, function(enemy)
         factory:fire(scene, enemy.position2d)
-    end)), 3, 200) end
+    end)), 6, 200) end
 
 local function display_title(scene, text, scale)
     local size = scale or 1
@@ -147,17 +147,17 @@ return {
                 scene:append(am:group():tag"continue")
             end),
             coroutine.create(function(scene)
-                local i = 5
+                local i = 60
                 while i > 0 do
                     scene"enemies":append(zoomer(scene, function(time) return math.sin(am.frame_time + time) * screenEdge.x / 2 end):spawn_top(0))
-                    am.wait(am.delay(0.5))
+                    am.wait(am.delay(0.3))
                     i = i - 1
                 end
-                local i = 3
+                local i = 15
                 local inc = screenEdge.x / i
                 math.randomseed(1337)
                 while i > 0 do
-                    scene"enemies":append(shooter(scene, -100):spawn_top(screenEdge.x / 2 - inc * (3 - i)))
+                    scene"enemies":append(shooter(scene, -100):spawn_top(screenEdge.x / 2 - inc * (15 - i)))
                     am.wait(am.delay(2 * (math.random() + 1.5)))
                     i = i - 1
                 end

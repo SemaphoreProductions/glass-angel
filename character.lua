@@ -1,10 +1,16 @@
 local Character = ...
 
+local Projectile = require 'projectile'
+
 local SPEED = 600
 local RADIUS = 2
 
+local bullet = "assets/sprite/angel_bullet.png"
 
-function Character:new(name, sprite, moveset, position, bcenter, bsize)
+local playerBulletFactory = function(curtain) return Projectile:newBulletFactory(curtain, bullet, 90, 700, false, "playerBullet") end
+
+
+function Character:new(name, sprite, moveset, position, bcenter, bsize, curtain)
     local character = {
         name = name,
         sprite = sprite,
@@ -14,11 +20,14 @@ function Character:new(name, sprite, moveset, position, bcenter, bsize)
         position = position or vec2(0.0, 0.0),
         velocity = vec2(0.0, 0.0),
         dead = false,
+        life = 2,
+        invuln = false,
         bcenter = bcenter,
         bsize = bsize,
         shouldFire = false,
         readyToFire = true,
         awaiting = false,
+        factory = playerBulletFactory(curtain)
     }
 
     function character:handleInput()
