@@ -79,9 +79,7 @@ function Menu:new()
         button("start", 0, function() 
             globalWindow.scene = Game:new()
         end),
-        button("settings", 1),
-        button("credits", 2),
-        button("quit", 3, function() globalWindow:close() end),
+        button("quit", 1, function() globalWindow:close() end),
         am.group():action(am.play(audio.mainMenuMusic, true, nil, VOLUME))
     }
 

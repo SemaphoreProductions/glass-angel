@@ -98,7 +98,7 @@ end
 
 function Game:new()
     Score = 0
-    Life = 1 -- initial lives
+    Life = 5 -- initial lives
 
     local reader = Reader.new(script())
 
