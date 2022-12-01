@@ -45,3 +45,19 @@ bg.scrolling = am.use_program(bg.scrollingShader)
     node.scrollFactor = node.scrollFactor + am.delta_time * bg.scrollSpeed
 end)
 ^ am.draw("triangles", am.rect_indices())
+
+function bg.set_texture(scene, tex)
+    local texture = am.texture2d(tex)
+    texture.twrap = "repeat"
+    scene:replace("bg", am.use_program(bg.scrollingShader):tag"bg"
+^ am.bind{
+    P = mat4(1),
+    uv = am.rect_verts_2d(0, 0, 1, 1),
+    vert = am.rect_verts_2d(-1, -1, 1, 1),
+    tex = texture,
+    scrollFactor = 0.0
+}:action(function(node)
+    node.scrollFactor = node.scrollFactor + am.delta_time * bg.scrollSpeed
+end)
+^ am.draw("triangles", am.rect_indices()))
+end

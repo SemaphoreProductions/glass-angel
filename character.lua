@@ -7,7 +7,7 @@ local RADIUS = 2
 
 local bullet = "assets/sprite/angel_bullet.png"
 
-local playerBulletFactory = function(curtain) return Projectile:newBulletFactory(curtain, bullet, 90, 700, false, "playerBullet") end
+local playerBulletFactory = function(curtain) return Projectile:newBulletFactory(curtain, bullet, 90, 1400, false, "playerBullet") end
 
 
 function Character:new(name, sprite, moveset, position, bcenter, bsize, curtain)

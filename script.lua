@@ -1,5 +1,6 @@
 local Enemy = require 'enemy'
 local Projectile = require 'projectile'
+local audio = require 'audio'
 
 local minion = [[
 ...r.r.r...
@@ -31,7 +32,9 @@ local function repeat_every(secs, func)
 end
 
 local zoomer = function(scene, xfunc) local time = am.frame_time return Enemy.minion(scene, minion, nil, move_and_then(vec2(0, -600), function(enemy)
-    enemy.position2d = enemy.position2d{ x = xfunc(time)}
+    if xfunc ~= nil then
+        enemy.position2d = enemy.position2d{ x = xfunc(time)}
+    end
 end, 2)) end
 
 
@@ -45,7 +48,12 @@ local shooter = function(scene, xvel)
 
 local function display_title(scene, text, scale)
     local size = scale or 1
-    scene:append(am.scale(size):tag"title" ^ am.text(fonts.annapurnaBoldLarge, text))
+    local title = am.scale(size):tag"title" ^ am.text(fonts.annapurnaBoldLarge, text)
+    if scene"title" ~= nil then
+        scene:replace("title", title)
+    else
+        scene:append(title)
+    end
 end
 
 local function fade_title(scene, fade_time)
@@ -102,11 +110,20 @@ local function until_any_key()
     end)
 end
 
+local function until_left_click()
+    return coroutine.create(function()
+        repeat
+            coroutine.yield()
+        until globalWindow:mouse_down("left")
+    end)
+end
+
 -- The complete script to the game - cutscenes, enemy waves, and boss fights
 return {
     -- Stage 1
     {
-        bgmusic = "audio/shockandawe.ogg",
+        bgmusic = audio.stage1,
+        bg = "assets/images/stage1finished.png",
         scenes = {
             coroutine.create(function(scene)
                 am.wait(am.delay(0.5))
@@ -147,35 +164,117 @@ return {
                 scene:append(am:group():tag"continue")
             end),
             coroutine.create(function(scene)
-                local i = 60
+                local i = 1
                 while i > 0 do
                     scene"enemies":append(zoomer(scene, function(time) return math.sin(am.frame_time + time) * screenEdge.x / 2 end):spawn_top(0))
                     am.wait(am.delay(0.3))
                     i = i - 1
                 end
-                local i = 15
-                local inc = screenEdge.x / i
+                local i = 1
                 math.randomseed(1337)
                 while i > 0 do
-                    scene"enemies":append(shooter(scene, -100):spawn_top(screenEdge.x / 2 - inc * (15 - i)))
+                    scene"enemies":append(shooter(scene, 50 * (-1) ^ (i)):spawn_top((math.random() * 50) * (-1) ^ i))
                     am.wait(am.delay(2 * (math.random() + 1.5)))
                     i = i - 1
                 end
-                local i = 20
-                while i > 0 do
-                    scene"enemies":append(shooter(scene, 50 * (math.random() - 0.5)):spawn_top(screenEdge.x * 1.5 * (math.random() - 0.5)))
-                    am.wait(am.delay((math.random() + 0.5)))
-                    i = i - 1
+                am.wait(am.delay(1))
+                scene:append(am:group():tag"continue")
+            end),
+            am.parallel{
+                coroutine.create(function(scene)
+                    am.wait(am.delay(5))
+                    local i = 10
+                    while i > 0 do
+                        scene"enemies":append(shooter(scene, (math.random() - 0.5) * 200):spawn_top((math.random() * screenEdge.x) * (-1) ^ i))
+                        am.wait(am.delay(2))
+                        i = i - 1
+                    end
+                    -- fade music
+                    am.wait(am.tween(scene.track, 4, { volume = 0.0}))
+                    scene:append(am.group():tag"continue")
                 end
-                am.wait(am.delay(3))
+                ),
+                coroutine.create(function(scene)
+                    local i = 300
+                    while i > 0 do
+                        scene"enemies":append(zoomer(scene):spawn_top((math.random() - 0.5) * screenEdge.x))
+                        am.wait(am.delay((0.2)))
+                        i = i - 1
+                    end
+                end)
+            }
+        }
+    },
+    {
+        bgmusic = audio.stageclear,
+        musicloop = false,
+        scenes = {
+            coroutine.create(function(scene)
+                display_title(scene, "Stage 1 Complete!\nLeft click\nto continue.", 0.5)
+                am.wait(until_left_click())
+                am.wait(fade_title(scene, 1.0))
+                scene:append(am:group():tag"continue")
+            end)
+        }
+    },
+    -- Stage 2
+    {
+        bgmusic = audio.stage2,
+        bg = "assets/images/stage3.png",
+        scenes = {
+            coroutine.create(function(scene)
+                ava.shouldShoot = false
+                finch.shouldShoot = false
+                am.wait(show_dialogue(scene"dialoguearea", "We've reached the 2nd circle.\nWe're getting close.", "Ava", "assets/images/expressions/happy_A.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "Uhh, how many circles are there,\n again?", "Finch", "assets/images/expressions/surprise.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "Only three, actually.", "Ava", "assets/images/expressions/happy_A.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "Huh? I thought there were more.", "Finch", "assets/images/expressions/neutral.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "Nah. That's just something\nDante made up.", "Ava", "assets/images/expressions/happy_A.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "What does each circle represent?", "Finch", "assets/images/expressions/neutral.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "I... have no idea.", "Ava", "assets/images/expressions/surprise_A.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "But it apparently has\nsomething to do with\nMicrosoft Paint?", "Ava", "assets/images/expressions/neutral_A.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "And... those weird harp things\nI guess.", "Ava", "assets/images/expressions/neutral_A.png"))
+                am.wait(until_any_key())
+                clear_dialogue(scene)
+                scene:append(am.group():tag"continue")
+            end),
+            coroutine.create(function(scene)
+                ava.shouldFire = true
+                finch.shouldFire = true
+                display_title(scene, "GET READY")
+                am.wait(am.delay(1))
+                am.wait(fade_title(scene, 1))
+                am.wait(am.delay(2))
                 scene:append(am:group():tag"continue")
             end),
             coroutine.create(function(scene)
-                display_title(scene, "That's all we\n have for now.\nLook forward\n to more!", 0.8)
+
             end)
         }
     },
     {
+        bgmusic = audio.stageclear,
+        musicloop = false,
+        scenes = {
+            coroutine.create(function(scene)
+                display_title(scene, "Stage 2 Complete!\nLeft click\nto continue.", 0.5)
+                am.wait(until_left_click())
+                am.wait(fade_title(scene, 1.0))
+                scene:append(am:group():tag"continue")
+            end)
+        }
+    },
+    {
+        bgmusic = audio.stage3,
+        bg = "assets/images/stage3.png",
         scenes = {}
     }
 }

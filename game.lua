@@ -8,12 +8,6 @@ local Reader = require 'reader'
 local audio = require 'audio'
 local Enemy = require 'enemy'
 
-local finchicon = [[
-    BBB
-    BBB
-    BBB
-]]
-
 local finchMoveset = {
     ["left"]  = vec2(-1.0, 0.0),
     ["right"] = vec2(1.0, 0.0),
@@ -33,14 +27,20 @@ local idleAnimation = {
     { row = 1, col = 2 },
 }
 
-local fire = "space"
-
 local bulletCooldown = 0.05
 
 local invulnTime = 1.0
 
 local hurt = am.sfxr_synth(20560004)
 local dead = am.sfxr_synth(50323902)
+
+function check_circle_bounds(c1, r1, c2, r2)
+    local distX = c1.x - c2.x;
+    local distY = c1.y - c2.y;
+    local distance = math.sqrt( (distX*distX) + (distY*distY) );
+
+    return distance <= r1+r2
+end
 
 function update_players(scene, players)
     local curtain = scene"bullet-curtain"
@@ -59,17 +59,16 @@ function update_players(scene, players)
             player.readyToFire = false
         end
         -- check for collisions
+        local BULLET_RADIUS = 5
         for _, bullet in enemy_curtain:child_pairs() do
-              if not player.invuln and check_bounds(bullet.position2d, vec2(5, 5), player.position) then
+              if not player.invuln and check_circle_bounds(bullet.position2d, BULLET_RADIUS, player.position, 1) then
                 if player.life > 0 then
                     scene:action(am.play(hurt))
                     enemy_curtain:remove(bullet)
                        player.life = player.life - 1
                        player.invuln = true
-                      print(scene(player.name))
                       scene(player.name):action(coroutine.create(function()
                            am.wait(am.delay(invulnTime))
-                           print("vulnerable")
                            player.invuln = false
                        end))
                 else
@@ -106,7 +105,7 @@ function Game:new()
     local reader = Reader.new(script)
 
     local game = am.group() ^ {
-        bg.scrolling,
+        bg.scrolling:tag"bg",
         am.group():tag"theater" ^ {
             am.group():tag("enemy-curtain"),
             am.group():tag("bullet-curtain"),
@@ -133,8 +132,10 @@ function Game:new()
     game:append(am.group():tag"dialoguearea")
     game:append(build_hud())
 
+    reader:init_stage(game)
+
     -- main game loop
-    game:action(am.parallel({am.play(audio.stage1, true, nil, VOLUME), function(scene)
+    game:action(am.parallel({function(scene)
         update_players(scene, {ava, finch})
         reader:update(scene)
     end}))
