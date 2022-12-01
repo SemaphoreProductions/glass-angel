@@ -11,4 +11,4 @@ local Game = require "game"
 
 fonts = require("fonts")
 
-globalWindow.scene = gameover.scene
+globalWindow.scene = Game:new()

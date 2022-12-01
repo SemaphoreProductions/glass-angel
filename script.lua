@@ -1,20 +1,7 @@
 local Enemy = require 'enemy'
 local Projectile = require 'projectile'
 local audio = require 'audio'
-
-local minion = [[
-...r.r.r...
-.rrrrrrrrr.
-.rRrrrrrRr.
-rrrrMMMrrrr
-.rrMMmMMrr.
-rrrMmmmMrrr
-.rrMMmMMrr.
-rrrrMMMrrrr
-.rRrrrrrRr.
-.rrrrrrrrr.
-...r.r.r...
-]]
+local anima = require 'anima'
 
 local function move_and_then(velocity, after)
     return am.parallel({function(enemy)
@@ -31,18 +18,105 @@ local function repeat_every(secs, func)
     end)
 end
 
-local zoomer = function(scene, xfunc) local time = am.frame_time return Enemy.minion(scene, minion, nil, move_and_then(vec2(0, -600), function(enemy)
+local eyeSprite = anima.te(
+    {
+        file = "assets/sprite/eye_sheet.png",
+        width = 50,
+        height = 57,
+        fps = 4.0,
+    },
+    {
+        { row = 1, col = 1 },
+        { row = 1, col = 2 },
+    }
+)
+
+local shooterSprite = am.scale(2) ^ anima.te(
+    {
+        file = "assets/sprite/demon_sheet.png",
+        width = 39,
+        height = 47,
+        fps = 8.0,
+    },
+    {
+        { row = 1, col = 1 },
+        { row = 1, col = 2 },
+        { row = 1, col = 3 },
+        { row = 1, col = 4 },
+        { row = 1, col = 5 },
+        { row = 1, col = 6 },
+        { row = 1, col = 7 },
+        { row = 1, col = 8 },
+    }
+)
+
+local harpSprite = anima.te(
+    {
+        file = "assets/sprite/harp_sheet.png",
+        width = 129,
+        height = 143,
+        fps = 4.0,
+    },
+    {
+        { row = 1, col = 1 },
+        { row = 1, col = 2 },
+        { row = 1, col = 3 },
+        { row = 1, col = 4 },
+        { row = 1, col = 5 },
+        { row = 1, col = 6 },
+    }
+)
+
+local bigEyeSprite = anima.te(
+    {
+        file = "assets/sprite/bigeyeball_sheet.png",
+        width = 39,
+        height = 47,
+        fps = 4.0,
+    },
+    {
+        { row = 1, col = 1 },
+        { row = 1, col = 2 },
+        { row = 1, col = 3 },
+        { row = 1, col = 4 },
+        { row = 1, col = 5 },
+        { row = 1, col = 6 },
+        { row = 1, col = 7 },
+        { row = 1, col = 8 },
+    }
+)
+
+local bossSprite = anima.te(
+    {
+        file = "assets/sprite/boss_sheet.png",
+        width = 315,
+        height = 313,
+        fps = 6.0,
+    },
+    {
+        { row = 1, col = 1 },
+        { row = 1, col = 2 },
+        { row = 1, col = 3 },
+        { row = 1, col = 4 },
+        { row = 1, col = 5 },
+        { row = 1, col = 6 },
+        { row = 1, col = 7 },
+        { row = 1, col = 8 },
+    }
+)
+
+
+local shooter_bullet = "assets/sprite/shooter_bullet.png"
+
+local zoomer = function(scene, xfunc) local time = am.frame_time return Enemy.minion(scene, eyeSprite, nil, move_and_then(vec2(0, -600), function(enemy)
     if xfunc ~= nil then
         enemy.position2d = enemy.position2d{ x = xfunc(time)}
     end
 end, 2)) end
 
-
-local shooter_bullet = "assets/sprite/shooter_bullet.png"
-
 local shooter = function(scene, xvel)
     local factory = Projectile:newMultishotBulletFactory(scene"enemy-curtain", shooter_bullet, {-10, -5, 0, 5, 10}, 400)
-    return Enemy.minion(scene, minion, nil, move_and_then(vec2(xvel, -200), repeat_every(2, function(enemy)
+    return Enemy.minion(scene, shooterSprite, nil, move_and_then(vec2(xvel, -200), repeat_every(2, function(enemy)
         factory:fire(scene, enemy.position2d)
     end)), 6, 200) end
 
@@ -119,7 +193,7 @@ local function until_left_click()
 end
 
 -- The complete script to the game - cutscenes, enemy waves, and boss fights
-return {
+return function() return {
     -- Stage 1
     {
         bgmusic = audio.stage1,
@@ -183,7 +257,7 @@ return {
             am.parallel{
                 coroutine.create(function(scene)
                     am.wait(am.delay(5))
-                    local i = 10
+                    local i = 18
                     while i > 0 do
                         scene"enemies":append(shooter(scene, (math.random() - 0.5) * 200):spawn_top((math.random() * screenEdge.x) * (-1) ^ i))
                         am.wait(am.delay(2))
@@ -239,10 +313,6 @@ return {
                 am.wait(until_any_key())
                 am.wait(show_dialogue(scene"dialoguearea", "I... have no idea.", "Ava", "assets/images/expressions/surprise_A.png"))
                 am.wait(until_any_key())
-                am.wait(show_dialogue(scene"dialoguearea", "But it apparently has\nsomething to do with\nMicrosoft Paint?", "Ava", "assets/images/expressions/neutral_A.png"))
-                am.wait(until_any_key())
-                am.wait(show_dialogue(scene"dialoguearea", "And... those weird harp things\nI guess.", "Ava", "assets/images/expressions/neutral_A.png"))
-                am.wait(until_any_key())
                 clear_dialogue(scene)
                 scene:append(am.group():tag"continue")
             end),
@@ -277,4 +347,4 @@ return {
         bg = "assets/images/stage3.png",
         scenes = {}
     }
-}
+} end

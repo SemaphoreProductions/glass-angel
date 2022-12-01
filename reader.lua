@@ -19,7 +19,6 @@ function Reader.new(script)
             scene:action("music", am.play(scene.track))
         end
         if background ~= nil then
-            print(background)
             bg.set_texture(scene, background)
         end
     end

@@ -8,6 +8,8 @@ local audio = require("audio")
 
 local Game = require("game")
 
+local fonts = require 'fonts'
+
 local textHeight = 64
 
 local function __NULL__() end

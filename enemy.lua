@@ -8,12 +8,9 @@ function Enemy.shootAtPlayer(scene, position)
     if position.x > 0 and scene"ava" ~= nil then
         -- Shoot at ava
         player = scene"ava"
-    elseif scene"finch" ~= nil then 
+    else
         -- Shoot at finch
         player = scene"finch"
-    else
-        print("Game over!")
-        return 0
     end
     -- calc relative vector
     local rel = player.position2d - position
@@ -32,21 +29,17 @@ function Enemy.minion(scene, sprite, rotation, behavior, health, score, invulnTi
 
     local invulnTime = invulnTime or 0.1
 
-    -- this assumes we use a text sprite!
-    local hit = sprite:gsub("[^%.%s]", "W")
-
     function minion:spawn_top(x)
         local position = vec2(x, screenEdge.y + 100)
         local enemy = am.translate(position)
-        :action(am.parallel{behavior, Enemy.dieOnHit(scene"enemies", scene"bullet-curtain", am.sprite(hit), health, invuln, invulnTime), function(enemy)
+        :action(am.parallel{behavior, Enemy.dieOnHit(scene"enemies", scene"bullet-curtain", health, invuln, invulnTime), function(enemy)
             if enemy.position2d.y < -screenEdge.y + 50 then
                 scene"enemies":remove(enemy) -- silent garbage disposal
             end
         end})
         :tag"enemy" 
         ^ am.rotate(rotation or 0) 
-        ^ am.scale(5)
-        ^ am.sprite(sprite)
+        ^ sprite
         function enemy:score()
             return score
         end
@@ -64,7 +57,7 @@ local hurt = am.sfxr_synth(20560004)
 local dead = am.sfxr_synth(50323902)
 
 --- AAAA stupid local transforms make everything miserable
-function Enemy.dieOnHit(theater, curtain, hit, health, invuln, invulnTime)
+function Enemy.dieOnHit(theater, curtain, health, invuln, invulnTime)
     return function(enemy)
         if invuln or enemy.position2d.y + 30 > screenEdge.y then
             return
@@ -81,10 +74,10 @@ function Enemy.dieOnHit(theater, curtain, hit, health, invuln, invulnTime)
                         health = health - 1
                         invuln = true
                         local old_sprite = enemy"sprite"
-                        enemy:replace("sprite", hit)
+                        --enemy:replace("sprite", hit)
                         enemy:action(coroutine.create(function()
                             am.wait(am.delay(invulnTime))
-                            enemy:replace("sprite", old_sprite)
+                            --enemy:replace("sprite", old_sprite)
                             invuln = false
                         end))
                     else

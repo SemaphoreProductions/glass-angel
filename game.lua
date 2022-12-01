@@ -42,7 +42,9 @@ function check_circle_bounds(c1, r1, c2, r2)
     return distance <= r1+r2
 end
 
-function update_players(scene, players)
+local gameover = require 'gameover'
+
+function update_players(scene, players, root)
     local curtain = scene"bullet-curtain"
     local enemy_curtain = scene"enemy-curtain"
     for _, player in ipairs(players) do
@@ -62,24 +64,20 @@ function update_players(scene, players)
         local BULLET_RADIUS = 5
         for _, bullet in enemy_curtain:child_pairs() do
               if not player.invuln and check_circle_bounds(bullet.position2d, BULLET_RADIUS, player.position, 1) then
-                if player.life > 0 then
+                enemy_curtain:remove(bullet)
+                if Life > 1 then
                     scene:action(am.play(hurt))
-                    enemy_curtain:remove(bullet)
-                       player.life = player.life - 1
-                       player.invuln = true
+                    Life = Life - 1
+                    player.invuln = true
                       scene(player.name):action(coroutine.create(function()
                            am.wait(am.delay(invulnTime))
                            player.invuln = false
                        end))
                 else
-                    scene:action(am.play(dead))
-                    player.dead = true
-                    -- kaboom!
-                    enemy_curtain:remove(bullet)
-                    scene:remove(player.name)
-                    player.shouldFire = false
-                    table.remove_all(players, player)
-                   end
+                    -- Game Over!
+                    root"game".paused = true
+                    root:append(gameover.scene)
+                end
              end
         end
     end
@@ -88,11 +86,11 @@ end
 local function build_hud()
     
     return am:group():tag"hud" ^ {
-        am.translate(-screenEdge.x, screenEdge.y) ^ am.scale(3) ^ am.text("AVA: 2", "left", "top"):action(function(node) node.text = "AVA: " .. ava.life end),
-        am.translate(screenEdge.x, screenEdge.y) ^ am.scale(3) ^ am.text("FINCH: 2", "right", "top"):action(function(node) node.text = "FINCH: " .. finch.life end),
         am.translate(0, screenEdge.y) ^ {
-            am.scale(3) ^ am.text("SCORE", "center", "top"),
-            am.translate(0, -16 * 3 - 8) ^ am.scale(3) ^ am.text(Score, "center", "top"):action(function(node) node.text = Score end)
+            am.translate(-75, 0) ^ am.scale(3) ^ am.text("SCORE", "center", "top"),
+            am.translate(-75, -16 * 3 - 8) ^ am.scale(3) ^ am.text(Score, "center", "top"):action(function(node) node.text = Score end),
+            am.translate(75, 0) ^ am.scale(3) ^ am.text("LIFE", "center", "top"),
+            am.translate(75, -16 * 3 - 8) ^ am.scale(3) ^ am.text(Life, "center", "top"):action(function(node) node.text = Life end),
         }
     }
 end
@@ -100,11 +98,11 @@ end
 
 function Game:new()
     Score = 0
-    local wave = 1
+    Life = 1 -- initial lives
 
-    local reader = Reader.new(script)
+    local reader = Reader.new(script())
 
-    local game = am.group() ^ {
+    local root = am.group():tag"root" ^ am.group():tag"game" ^ {
         bg.scrolling:tag"bg",
         am.group():tag"theater" ^ {
             am.group():tag("enemy-curtain"),
@@ -113,6 +111,8 @@ function Game:new()
             am.group():tag"continue",
         }
     }
+
+    local game = root"game"
 
     ava = Character:new("ava", anima.te({
         file = "assets/sprite/ava.png",
@@ -136,9 +136,9 @@ function Game:new()
 
     -- main game loop
     game:action(am.parallel({function(scene)
-        update_players(scene, {ava, finch})
+        update_players(scene, {ava, finch}, root)
         reader:update(scene)
     end}))
 
-    return game
+    return root
 end

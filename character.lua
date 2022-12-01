@@ -19,8 +19,6 @@ function Character:new(name, sprite, moveset, position, bcenter, bsize, curtain)
         speed = SPEED,
         position = position or vec2(0.0, 0.0),
         velocity = vec2(0.0, 0.0),
-        dead = false,
-        life = 2,
         invuln = false,
         bcenter = bcenter,
         bsize = bsize,
