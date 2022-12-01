@@ -18,7 +18,7 @@ function Enemy.shootAtPlayer(scene, position)
     return angle
 end
 
-function Enemy.minion(scene, sprite, rotation, behavior, health, score, invulnTime)
+function Enemy.minion(scene, sprite, radius, rotation, behavior, health, score, invulnTime)
     local minion = {}
 
     local health = health or 1
@@ -42,6 +42,9 @@ function Enemy.minion(scene, sprite, rotation, behavior, health, score, invulnTi
         ^ sprite
         function enemy:score()
             return score
+        end
+        function enemy:radius()
+            return radius
         end
         return enemy
     end
