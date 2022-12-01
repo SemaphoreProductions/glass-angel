@@ -29,8 +29,8 @@ function Enemy.minion(scene, sprite, radius, rotation, behavior, health, score, 
 
     local invulnTime = invulnTime or 0.1
 
-    function minion:spawn_top(x)
-        local position = vec2(x, screenEdge.y + 100)
+    function minion:spawn_at(x, y)
+        local position = vec2(x, y)
         local enemy = am.translate(position)
         :action(am.parallel{behavior, Enemy.dieOnHit(scene"enemies", scene"bullet-curtain", health, invuln, invulnTime), function(enemy)
             if enemy.position2d.y < -screenEdge.y + 50 then
@@ -47,6 +47,10 @@ function Enemy.minion(scene, sprite, radius, rotation, behavior, health, score, 
             return radius
         end
         return enemy
+    end
+
+    function minion:spawn_top(x)
+        return minion:spawn_at(x, screenEdge.y + 100)
     end
 
     return minion

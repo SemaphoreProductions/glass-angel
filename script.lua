@@ -2,6 +2,7 @@ local Enemy = require 'enemy'
 local Projectile = require 'projectile'
 local audio = require 'audio'
 local anima = require 'anima'
+local Menu = require 'menu'
 
 local function move_and_then(velocity, after)
     return am.parallel({function(enemy)
@@ -108,17 +109,31 @@ local bossSprite = anima.te(
 
 local shooter_bullet = "assets/sprite/shooter_bullet.png"
 
-local zoomer = function(scene, xfunc) local time = am.frame_time return Enemy.minion(scene, eyeSprite, 30, nil, move_and_then(vec2(0, -600), function(enemy)
+local zoomer = function(scene, xfunc, vel) local time = am.frame_time return Enemy.minion(scene, eyeSprite, 30, nil, move_and_then(vel or vec2(0, -600), function(enemy)
     if xfunc ~= nil then
         enemy.position2d = enemy.position2d{ x = xfunc(time)}
     end
-end, 2)) end
+end, 2, 20)) end
 
 local shooter = function(scene, xvel)
     local factory = Projectile:newMultishotBulletFactory(scene"enemy-curtain", shooter_bullet, {-10, -5, 0, 5, 10}, 400)
     return Enemy.minion(scene, shooterSprite, 50, nil, move_and_then(vec2(xvel, -200), repeat_every(2, function(enemy)
         factory:fire(scene, enemy.position2d)
     end)), 6, 200) end
+
+local harp = function(scene, xfunc)
+    local pattern = {}
+    for i=-180,180,10 do
+        table.insert(pattern, i)
+    end
+    local factory = Projectile:newMultishotBulletFactory(scene"enemy-curtain", shooter_bullet, pattern, 300)
+    return Enemy.minion(scene, harpSprite, 100, nil, move_and_then(vec2(0, -200), repeat_every(2, function(enemy)
+        if xfunc ~= nil then
+            enemy.position2d = enemy.position2d{ x = xfunc(time)}
+        end
+        factory:fire(scene, enemy.position2d)
+    end)), 10, 500)
+end
 
 local function display_title(scene, text, scale)
     local size = scale or 1
@@ -238,13 +253,13 @@ return function() return {
                 scene:append(am:group():tag"continue")
             end),
             coroutine.create(function(scene)
-                local i = 1
+                local i = 60
                 while i > 0 do
                     scene"enemies":append(zoomer(scene, function(time) return math.sin(am.frame_time + time) * screenEdge.x / 2 end):spawn_top(0))
                     am.wait(am.delay(0.3))
                     i = i - 1
                 end
-                local i = 1
+                local i = 10
                 math.randomseed(1337)
                 while i > 0 do
                     scene"enemies":append(shooter(scene, 50 * (-1) ^ (i)):spawn_top((math.random() * 50) * (-1) ^ i))
@@ -253,6 +268,14 @@ return function() return {
                 end
                 am.wait(am.delay(1))
                 scene:append(am:group():tag"continue")
+            end),
+            coroutine.create(function(scene)
+                for i=1,30 do
+                    scene"enemies":append(zoomer(scene, nil, vec2(300 * (-1)^(i+1), -50)):spawn_at((screenEdge.x + 100) * (-1)^i, (math.random() - 0.5) * screenEdge.y))
+                    am.wait(am.delay(0.4))
+                end
+                am.wait(am.delay(2))
+                scene:append(am.group():tag"continue")
             end),
             am.parallel{
                 coroutine.create(function(scene)
@@ -263,13 +286,14 @@ return function() return {
                         am.wait(am.delay(2))
                         i = i - 1
                     end
+                    am.wait(am.delay(5))
                     -- fade music
                     am.wait(am.tween(scene.track, 4, { volume = 0.0}))
                     scene:append(am.group():tag"continue")
                 end
                 ),
                 coroutine.create(function(scene)
-                    local i = 300
+                    local i = 200
                     while i > 0 do
                         scene"enemies":append(zoomer(scene):spawn_top((math.random() - 0.5) * screenEdge.x))
                         am.wait(am.delay((0.2)))
@@ -284,7 +308,7 @@ return function() return {
         musicloop = false,
         scenes = {
             coroutine.create(function(scene)
-                display_title(scene, "Stage 1 Complete!\nLeft click\nto continue.", 0.5)
+                display_title(scene, "Circle 1 Cleared!\nLeft click\nto continue.", 0.5)
                 am.wait(until_left_click())
                 am.wait(fade_title(scene, 1.0))
                 scene:append(am:group():tag"continue")
@@ -304,6 +328,8 @@ return function() return {
                 am.wait(show_dialogue(scene"dialoguearea", "Uhh, how many circles are there,\n again?", "Finch", "assets/images/expressions/surprise.png"))
                 am.wait(until_any_key())
                 am.wait(show_dialogue(scene"dialoguearea", "Only three, actually.", "Ava", "assets/images/expressions/happy_A.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "Although, since the developer\n ran out of time,\n there's only two.", "Ava", "assets/images/expressions/angry_A.png"))
                 am.wait(until_any_key())
                 am.wait(show_dialogue(scene"dialoguearea", "Huh? I thought there were more.", "Finch", "assets/images/expressions/neutral.png"))
                 am.wait(until_any_key())
@@ -325,9 +351,29 @@ return function() return {
                 am.wait(am.delay(2))
                 scene:append(am:group():tag"continue")
             end),
-            coroutine.create(function(scene)
-
-            end)
+            am.parallel{
+                coroutine.create(function(scene)
+                    for i=1,10 do
+                        scene"enemies":append(harp(scene):spawn_top((math.random() - 0.5) * 400))
+                        am.wait(am.delay(5))
+                    end
+                    scene:append(am:group():tag"continue")
+                end),
+                coroutine.create(function(scene)
+                    for i=1,100 do
+                        scene"enemies":append(zoomer(scene, nil, vec2(300, 0)):spawn_at(-screenEdge.x - 100, (math.random() - 0.5) * screenEdge.y))
+                        am.wait(am.delay(0.3))
+                    end
+                end),
+                coroutine.create(function(scene)
+                    local i = 15
+                while i > 0 do
+                    scene"enemies":append(shooter(scene, (math.random() - 0.5) * 200):spawn_top((math.random() * screenEdge.x) * (-1) ^ i))
+                    am.wait(am.delay(1))
+                    i = i - 1
+                end
+                end)
+            }
         }
     },
     {
@@ -335,16 +381,49 @@ return function() return {
         musicloop = false,
         scenes = {
             coroutine.create(function(scene)
-                display_title(scene, "Stage 2 Complete!\nLeft click\nto continue.", 0.5)
+                display_title(scene, "Circle 2 Cleared!\nLeft click\nto continue.", 0.5)
                 am.wait(until_left_click())
                 am.wait(fade_title(scene, 1.0))
-                scene:append(am:group():tag"continue")
+                scene:append(am.group():tag"continue")
+            end),
+            coroutine.create(function(scene)
+                scene:append(am.group():tag"continue")
             end)
         }
     },
     {
         bgmusic = audio.stage3,
         bg = "assets/images/stage3.png",
-        scenes = {}
+        scenes = {
+            coroutine.create(function(scene)
+                am.wait(am.delay(6))
+                am.wait(show_dialogue(scene"dialoguearea", "Umm... this is the boss\n level, right?", "Finch", "assets/images/expressions/angry.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "As I said,\nthe developer ran out\nof time.", "Ava", "assets/images/expressions/surprise_A.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "So uhhh sorry.\nThis is anticlimactic.", "Ava", "assets/images/expressions/surprise_A.png"))
+                am.wait(until_any_key())
+                am.wait(show_dialogue(scene"dialoguearea", "Okay, regardless,\nit's time to judge you,\nthe player.", "Ava", "assets/images/expressions/neutral_A.png"))
+                am.wait(until_any_key())
+                if Continue ~= false then
+                    am.wait(show_dialogue(scene"dialoguearea", "Well, it looks\nlike you used Continue to\nget this far.", "Ava", "assets/images/expressions/neutral_A.png"))
+                    am.wait(until_any_key())
+                    am.wait(show_dialogue(scene"dialoguearea", "No shame in that!\n This game is tricky and unfair.", "Ava", "assets/images/expressions/happy_A.png"))
+                    am.wait(until_any_key())
+                    am.wait(show_dialogue(scene"dialoguearea", "If you're up for a\nchallenge, try reaching here\nwithout using Continue.", "Finch", "assets/images/expressions/happy.png"))
+                    am.wait(until_any_key())
+                else
+                    am.wait(show_dialogue(scene"dialoguearea", "Wow, look at that!\nNot a single Continue!", "Ava", "assets/images/expressions/happy_A.png"))
+                    am.wait(until_any_key())
+                    am.wait(show_dialogue(scene"dialoguearea", "Congrats! That is\nnot easy.", "Ava", "assets/images/expressions/happy_A.png"))
+                    am.wait(until_any_key())
+                    am.wait(show_dialogue(scene"dialoguearea", "If you're up for\nanother go, why not beat\nyour last score?", "Finch", "assets/images/expressions/happy.png"))
+                    am.wait(until_any_key())
+                end
+                am.wait(show_dialogue(scene"dialoguearea", "Your final score was " .. Score .. ".\n Thank you for playing!", "Finch", "assets/images/expressions/happy.png"))
+                am.wait(until_any_key())
+                globalWindow.scene = Menu:new()
+            end)
+        }
     }
 } end
