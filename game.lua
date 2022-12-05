@@ -147,5 +147,11 @@ function Game:new()
         reader:update(scene)
     end}))
 
+    root:action(function(scene)
+        if globalWindow:key_down("p") then
+            scene"game".paused = not scene"game".paused
+        end
+    end)
+
     return root
 end
