@@ -208,7 +208,10 @@ local function until_left_click()
 end
 
 -- The complete script to the game - cutscenes, enemy waves, and boss fights
-return function() return {
+return function(scene)
+    local ava = scene"ava"
+    local finch = scene"finch"
+    return {
     -- Stage 1
     {
         bgmusic = audio.stage1,
