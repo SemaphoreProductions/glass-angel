@@ -116,7 +116,7 @@ local zoomer = function(scene, xfunc, vel) local time = am.frame_time return Ene
 end, 2, 20)) end
 
 local shooter = function(scene, xvel)
-    local factory = Projectile:newMultishotBulletFactory(scene"enemy-curtain", shooter_bullet, {-10, -5, 0, 5, 10}, 400)
+    local factory = Projectile:newBulletFactory(scene"enemy-curtain", shooter_bullet, {-10, -5, 0, 5, 10}, 400)
     return Enemy.minion(scene, shooterSprite, 50, nil, move_and_then(vec2(xvel, -200), repeat_every(2, function(enemy)
         factory:fire(scene, enemy.position2d)
     end)), 6, 200) end
@@ -126,7 +126,7 @@ local harp = function(scene, xfunc)
     for i=-180,180,10 do
         table.insert(pattern, i)
     end
-    local factory = Projectile:newMultishotBulletFactory(scene"enemy-curtain", shooter_bullet, pattern, 300)
+    local factory = Projectile:newBulletFactory(scene"enemy-curtain", shooter_bullet, pattern, 300)
     return Enemy.minion(scene, harpSprite, 100, nil, move_and_then(vec2(0, -200), repeat_every(2, function(enemy)
         if xfunc ~= nil then
             enemy.position2d = enemy.position2d{ x = xfunc(time)}
