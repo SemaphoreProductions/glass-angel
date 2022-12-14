@@ -85,7 +85,7 @@ function update_players(scene, players, root)
             check_death(bullet, bullet_curtain, BULLET_RADIUS)
         end
         for _, enemy in enemies:child_pairs() do
-            check_death(enemy, enemies, enemy:radius())
+            check_death(enemy, enemies, enemy.radius)
         end
     end
 end

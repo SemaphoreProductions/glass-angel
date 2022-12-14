@@ -109,17 +109,43 @@ local bossSprite = anima.te(
 
 local shooter_bullet = "assets/sprite/shooter_bullet.png"
 
-local zoomer = function(scene, xfunc, vel) local time = am.frame_time return Enemy.minion(scene, eyeSprite, 30, nil, move_and_then(vel or vec2(0, -600), function(enemy)
-    if xfunc ~= nil then
-        enemy.position2d = enemy.position2d{ x = xfunc(time)}
-    end
-end, 2, 20)) end
+local zoomer = function(scene, xfunc, vel)
+    local time = am.frame_time
+    return Enemy.new(
+        scene,
+        eyeSprite,
+        30,
+        nil,
+        move_and_then(
+            vel or vec2(0, -600),
+            function(enemy)
+                if xfunc ~= nil then
+                    enemy.position2d = enemy.position2d{ x = xfunc(time)}
+                end
+            end
+        ),
+        2,
+        20
+    )
+end
 
 local shooter = function(scene, xvel)
     local factory = Projectile:newBulletFactory(scene"enemy-curtain", shooter_bullet, {-10, -5, 0, 5, 10}, 400)
-    return Enemy.minion(scene, shooterSprite, 50, nil, move_and_then(vec2(xvel, -200), repeat_every(2, function(enemy)
-        factory:fire(scene, enemy.position2d)
-    end)), 6, 200) end
+    return Enemy.new(
+        scene,
+        shooterSprite,
+        50,
+        nil,
+        move_and_then(
+            vec2(xvel, -200),
+            repeat_every(2, function(enemy)
+                factory:fire(scene, enemy.position2d)
+            end)
+        ),
+        6,
+        200
+    )
+end
 
 local harp = function(scene, xfunc)
     local pattern = {}
@@ -127,12 +153,23 @@ local harp = function(scene, xfunc)
         table.insert(pattern, i)
     end
     local factory = Projectile:newBulletFactory(scene"enemy-curtain", shooter_bullet, pattern, 300)
-    return Enemy.minion(scene, harpSprite, 100, nil, move_and_then(vec2(0, -200), repeat_every(2, function(enemy)
-        if xfunc ~= nil then
-            enemy.position2d = enemy.position2d{ x = xfunc(time)}
-        end
-        factory:fire(scene, enemy.position2d)
-    end)), 10, 500)
+    return Enemy.new(
+        scene,
+        harpSprite,
+        100,
+        nil,
+        move_and_then(
+            vec2(0, -200),
+            repeat_every(2, function(enemy)
+                if xfunc ~= nil then
+                    enemy.position2d = enemy.position2d{ x = xfunc(time)}
+                end
+                factory:fire(scene, enemy.position2d)
+            end)
+        ),
+        10,
+        500
+    )
 end
 
 local function display_title(scene, text, scale)
