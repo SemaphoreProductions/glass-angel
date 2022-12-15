@@ -2,7 +2,13 @@ local Projectile = ...
 
 local Enemy = require 'enemy'
 
+local Bump = require 'lib/bump'
+local bulletWorld = Bump.newWorld(64)
 
+function Projectile:checkBulletRect(x, y, w, h)
+    local items, len = bulletWorld:queryRect(x, y, w, h)
+    return items[1]
+end
 
 function Projectile:shootAt(me, other, speed)
     local velocity = normalize(vec2(me, other)) * speed
@@ -12,11 +18,23 @@ function Projectile:shootAt(me, other, speed)
 end
 
 function Projectile:newBullet(sprite, position, rotation, behavior, tagname)
-    return am.translate(position)
+    local node = am.translate(position)
     :tag(tagname)
-    :action(behavior) 
+    :action("action", function(node)
+        local result = behavior(node)
+        if result ~= "removed" then
+            bulletWorld:update(node, node.position2d.x, node.position2d.y)
+        end
+    end) 
     ^ am.rotate(rotation) 
     ^ am.sprite(sprite)
+    bulletWorld:add(node, node.position2d.x, node.position2d.y, 1, 1)
+    return node
+end
+
+function Projectile:removeBullet(curtain, node)
+    bulletWorld:remove(node)
+    curtain:remove(node)
 end
 
 function Projectile:newBulletFactory(curtain, sprite, angles, speed, shootPlayer, tagname)
@@ -37,7 +55,8 @@ function Projectile:newBulletFactory(curtain, sprite, angles, speed, shootPlayer
             curtain:append(Projectile:newBullet(sprite, position, shootAngle, function(node)
                 if node.position2d.x > screenEdge.x*2 or node.position2d.x < -screenEdge.x*2
                     or node.position2d.y > screenEdge.y*2 or node.position2d.y < -screenEdge.y*2 then
-                    scene:remove(node)
+                    Projectile:removeBullet(curtain, node) -- may have to resolve where this happens, but i want it working
+                    return "removed" -- let behavior know to cancel
                 end
                 node.position2d = node.position2d + am.delta_time * velocity
             end, tagname))

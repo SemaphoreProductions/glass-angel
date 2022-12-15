@@ -107,7 +107,7 @@ function Game:new()
     Score = 0
     Life = 5 -- initial lives
 
-    local root = am.group():tag"root" ^ am.group():tag"game" ^ {
+    --[=[local]=] root = am.group():tag"root" ^ am.group():tag"game" ^ {
         bg.scrolling:tag"bg",
         am.group():tag"theater" ^ {
             am.group():tag("enemy-curtain"),

@@ -64,6 +64,15 @@ function check_bounds(center, size, target)
        and target.y >= center.y - size.y/2
 end
 
+local function check_bullet(center, size)
+    return Projectile:checkBulletRect(
+        center.x - size.x/2,
+        center.y + size.y/2,
+        size.x,
+        size.y
+    )
+end
+
 local hurt = am.sfxr_synth(20560004)
 local dead = am.sfxr_synth(50323902)
 
@@ -73,31 +82,28 @@ function Enemy.dieOnHit(theater, curtain, health, invuln, invulnTime)
         if invuln or enemy.position2d.y + 30 > screenEdge.y then
             return
         end
-        -- Check for collision
-        -- ugh this is not efficient (O(n^2))
-        for _, bullet in ipairs(curtain:all"playerBullet") do
-            -- Check translation
-            -- find a better way to get enemy size
-            if check_bounds(bullet.position2d, vec2(55, 55), enemy.position2d) then
-                if health > 1 then
-                    theater:action(am.play(hurt))
-                    curtain:remove(bullet)
-                    health = health - 1
-                    invuln = true
-                    local old_sprite = enemy"sprite"
-                    --enemy:replace("sprite", hit)
-                    enemy:action(coroutine.create(function()
-                        am.wait(am.delay(invulnTime))
-                        --enemy:replace("sprite", old_sprite)
-                        invuln = false
-                    end))
-                else
-                    theater:action(am.play(dead))
-                    Score = Score + enemy.score
-                    -- kaboom!
-                    theater:remove(enemy)
-                    curtain:remove(bullet)
-                end
+        -- Check translation
+        -- find a better way to get enemy size
+        local bullet = check_bullet(enemy.position2d, vec2(55, 55))
+        if bullet then
+            if health > 1 then
+                theater:action(am.play(hurt))
+                Projectile:removeBullet(curtain, bullet)
+                health = health - 1
+                invuln = true
+                local old_sprite = enemy"sprite"
+                --enemy:replace("sprite", hit)
+                enemy:action(coroutine.create(function()
+                    am.wait(am.delay(invulnTime))
+                    --enemy:replace("sprite", old_sprite)
+                    invuln = false
+                end))
+            else
+                theater:action(am.play(dead))
+                Score = Score + enemy.score
+                -- kaboom!
+                theater:remove(enemy)
+                curtain:remove(bullet)
             end
         end
     end
