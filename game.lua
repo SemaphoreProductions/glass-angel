@@ -58,7 +58,7 @@ function update_players(scene, players, root)
                 player.awaiting = false
             end))
         elseif not player.awaiting then
-            player.factory:fire(scene, player.position)
+            player.factory:fire(scene, player.position2d)
             player.readyToFire = false
         end
         -- check for collisions
@@ -85,7 +85,7 @@ function update_players(scene, players, root)
             check_death(bullet, bullet_curtain, BULLET_RADIUS)
         end
         for _, enemy in enemies:child_pairs() do
-            check_death(enemy, enemies, enemy:radius())
+            check_death(enemy, enemies, enemy.radius)
         end
     end
 end
@@ -107,9 +107,7 @@ function Game:new()
     Score = 0
     Life = 5 -- initial lives
 
-    local reader = Reader.new(script())
-
-    local root = am.group():tag"root" ^ am.group():tag"game" ^ {
+    --[=[local]=] root = am.group():tag"root" ^ am.group():tag"game" ^ {
         bg.scrolling:tag"bg",
         am.group():tag"theater" ^ {
             am.group():tag("enemy-curtain"),
@@ -120,25 +118,42 @@ function Game:new()
     }
 
     local game = root"game"
+    
+    local ava = Character:new({
+        name = "ava",
+        sprite = anima.te({
+            file = "assets/sprite/ava.png",
+            width = 104 / 2,
+            height = 82,
+            fps = 2.0
+        }, idleAnimation),
+        moveset = avaMoveset,
+        position2d = vec2(-300, -250),
+        bcenter = vec2(-screenEdge.x / 2, 0),
+        bsize = screenEdge{ y = screenEdge.y * 2},
+        curtain = game"bullet-curtain"
+    })
+    local finch = Character:new({
+        name = "finch",
+        sprite = anima.te({
+            file = "assets/sprite/finch.png",
+            width = 104 / 2,
+            height = 82,
+            fps = 2.0
+        }, idleAnimation),
+        moveset = finchMoveset,
+        position2d = vec2(300, -250),
+        bcenter = vec2(screenEdge.x / 2, 0),
+        bsize = screenEdge{ y = screenEdge.y * 2},
+        curtain = game"bullet-curtain"
+    })
 
-    ava = Character:new("ava", anima.te({
-        file = "assets/sprite/ava.png",
-        width = 104 / 2,
-        height = 82,
-        fps = 2.0
-    }, idleAnimation), avaMoveset, vec2(-300, -250), vec2(-screenEdge.x / 2, 0), screenEdge{ y = screenEdge.y * 2}, game"bullet-curtain")
-    finch = Character:new("finch", anima.te({
-        file = "assets/sprite/finch.png",
-        width = 104 / 2,
-        height = 82,
-        fps = 2.0
-    }, idleAnimation), finchMoveset, vec2(300, -250), vec2(screenEdge.x / 2, 0), screenEdge{ y = screenEdge.y * 2}, game"bullet-curtain")
-
-    game:append(Character:newNode(ava))
-    game:append(Character:newNode(finch))
+    game:append(ava)
+    game:append(finch)
     game:append(am.group():tag"dialoguearea")
     game:append(build_hud())
 
+    local reader = Reader:new(script(game))
     reader:init_stage(game)
 
     -- main game loop
