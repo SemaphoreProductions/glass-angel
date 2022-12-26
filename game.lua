@@ -47,7 +47,7 @@ local gameover = require 'gameover'
 function update_players(scene, players, root)
     local curtain = scene"bullet-curtain"
     local enemy_curtain = scene"enemy-curtain"
-    local enemies = scene"enemies"
+    local enemies = scene"enemies":all("enemy")
     for _, player in ipairs(players) do
         if not player.shouldFire then
         elseif not player.readyToFire and not player.awaiting then
@@ -84,8 +84,8 @@ function update_players(scene, players, root)
         for _, bullet in enemy_curtain:child_pairs() do
             check_death(bullet, bullet_curtain, BULLET_RADIUS)
         end
-        for _, enemy in enemies:child_pairs() do
-            check_death(enemy, enemies, enemy.radius)
+        for _, enemy in ipairs(enemies) do
+            check_death(enemy, scene"enemies", enemy.radius)
         end
     end
 end

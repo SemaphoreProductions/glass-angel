@@ -1,6 +1,7 @@
 local Enemy = ...
 
 local Projectile = require 'projectile'
+local Fx = require 'fx'
 
 function Enemy.shootAtPlayer(scene, position) 
     -- shoot at player on our side of the screen
@@ -100,11 +101,32 @@ function Enemy.dieOnHit(theater, curtain, health, invuln, invulnTime)
                 end))
             else
                 theater:action(am.play(dead))
+                -- Update enemy score
                 Score = Score + enemy.score
-                -- kaboom!
-                theater:remove(enemy)
+                -- todo: bullet effect on hit
                 curtain:remove(bullet)
+                Enemy.explode(theater, enemy)
             end
         end
     end
+end
+
+local function death(enemy, duration)
+    local duration = duration or 0.4
+    local effect = Fx.pulse_explosion(enemy.position2d, 3, 100, duration)
+    effect.duration = duration
+    return effect
+end
+
+-- Deletes `enemy` from the `theater` and replaces it
+-- with a temporary death effect
+function Enemy.explode(theater, enemy)
+    theater:remove(enemy)
+    local death_effect = death(enemy)
+    -- put the effect at the lowest layer possible in `theater`
+    theater:prepend(death_effect)
+    theater:action(coroutine.create(function() 
+        am.wait(am.delay(death_effect.duration))
+        theater:remove(death_effect) 
+    end))
 end
