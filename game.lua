@@ -62,10 +62,10 @@ function update_players(scene, players, root)
             player.readyToFire = false
         end
         -- check for collisions
-        local BULLET_RADIUS = 5
-        local check_death = function(obj, field, radius)
-            if not player.invuln and field ~= nil and check_circle_bounds(obj.position2d, radius, player.position, 1) then
-                field:remove(obj)
+        local obj = Projectile.checkBullet(player.position2d, vec2(5, 5), "enemyBullet")
+            if not player.invuln and obj then
+                print(obj)
+                enemy_curtain:remove(obj)
                 if Life > 1 then
                     scene:action(am.play(hurt))
                     Life = Life - 1
@@ -80,13 +80,6 @@ function update_players(scene, players, root)
                     root:append(gameover.scene)
                 end
              end
-        end
-        for _, bullet in enemy_curtain:child_pairs() do
-            check_death(bullet, bullet_curtain, BULLET_RADIUS)
-        end
-        for _, enemy in ipairs(enemies) do
-            check_death(enemy, scene"enemies", enemy.radius)
-        end
     end
 end
 

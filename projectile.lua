@@ -7,7 +7,7 @@ local bulletWorld = Bump.newWorld(64)
 
 function Projectile:checkBulletRect(x, y, w, h)
     local items, len = bulletWorld:queryRect(x, y, w, h)
-    return items[1]
+    return items
 end
 
 function Projectile:shootAt(me, other, speed)
@@ -64,4 +64,19 @@ function Projectile:newBulletFactory(curtain, sprite, angles, speed, shootPlayer
     end
     
     return factory
+end
+
+function Projectile.checkBullet(center, size, filter)
+    local items = Projectile:checkBulletRect(
+        center.x - size.x/2,
+        center.y + size.y/2,
+        size.x,
+        size.y
+    )
+    for _, item in ipairs(items) do
+        if #item:all(filter, false) > 0 then
+            return item
+        end
+    end
+    return nil
 end

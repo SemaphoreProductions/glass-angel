@@ -65,15 +65,6 @@ function check_bounds(center, size, target)
        and target.y >= center.y - size.y/2
 end
 
-local function check_bullet(center, size)
-    return Projectile:checkBulletRect(
-        center.x - size.x/2,
-        center.y + size.y/2,
-        size.x,
-        size.y
-    )
-end
-
 local hurt = am.sfxr_synth(20560004)
 local dead = am.sfxr_synth(50323902)
 
@@ -85,7 +76,7 @@ function Enemy.dieOnHit(theater, curtain, health, invuln, invulnTime)
         end
         -- Check translation
         -- find a better way to get enemy size
-        local bullet = check_bullet(enemy.position2d, vec2(55, 55))
+        local bullet = Projectile.checkBullet(enemy.position2d, vec2(55, 55), "playerBullet")
         if bullet then
             if health > 1 then
                 theater:action(am.play(hurt))
