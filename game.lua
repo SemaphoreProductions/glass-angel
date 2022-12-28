@@ -7,6 +7,8 @@ local script = require 'script'
 local Reader = require 'reader'
 local audio = require 'audio'
 local Enemy = require 'enemy'
+local Physics = require 'physics'
+local splash = require 'lib/splash'
 
 local finchMoveset = {
     ["left"]  = vec2(-1.0, 0.0),
@@ -34,20 +36,12 @@ local invulnTime = 1.0
 local hurt = am.sfxr_synth(20560004)
 local dead = am.sfxr_synth(50323902)
 
-function check_circle_bounds(c1, r1, c2, r2)
-    local distX = c1.x - c2.x;
-    local distY = c1.y - c2.y;
-    local distance = math.sqrt( (distX*distX) + (distY*distY) );
-
-    return distance <= r1+r2
-end
-
 local gameover = require 'gameover'
 
 function update_players(scene, players, root)
     local curtain = scene"bullet-curtain"
     local enemy_curtain = scene"enemy-curtain"
-    local enemies = scene"enemies":all("enemy")
+    local enemies = scene"enemies"
     for _, player in ipairs(players) do
         if not player.shouldFire then
         elseif not player.readyToFire and not player.awaiting then
@@ -62,10 +56,15 @@ function update_players(scene, players, root)
             player.readyToFire = false
         end
         -- check for collisions
-        local obj = Projectile.checkBullet(player.position2d, vec2(5, 5), "enemyBullet")
+        local obj = Physics.queryCollidableWithTag(splash.circle(player.position2d.x, player.position2d.y, 5), "enemyCollidable")
             if not player.invuln and obj then
-                print(obj)
-                enemy_curtain:remove(obj)
+                if table.search(enemies:all"enemyCollidable", obj) ~= nil then
+                    obj:die(enemies)
+                elseif table.search(enemy_curtain:all"enemyCollidable", obj) ~= nil then
+                    obj:die(enemy_curtain)
+                else
+                    print("Warning: attempted to delete an enemy collidable that did not belong to a recognized scene graph node!")
+                end
                 if Life > 1 then
                     scene:action(am.play(hurt))
                     Life = Life - 1
@@ -101,13 +100,14 @@ function Game:new()
     Life = 5 -- initial lives
 
     --[=[local]=] root = am.group():tag"root" ^ am.group():tag"game" ^ {
+        Physics.newWorld(64), -- make cellSize a param in the future
         bg.scrolling:tag"bg",
         am.group():tag"theater" ^ {
             am.group():tag("enemy-curtain"),
             am.group():tag("bullet-curtain"),
             am.group():tag("enemies"),
             am.group():tag"continue",
-        }
+        },
     }
 
     local game = root"game"

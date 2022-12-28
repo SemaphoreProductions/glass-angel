@@ -130,7 +130,7 @@ local zoomer = function(scene, xfunc, vel)
 end
 
 local shooter = function(scene, xvel)
-    local factory = Projectile:newBulletFactory(scene"enemy-curtain", shooter_bullet, {-10, -5, 0, 5, 10}, 400, true, "enemyBullet")
+    local factory = Projectile:newBulletFactory(scene"enemy-curtain", shooter_bullet, {-10, -5, 0, 5, 10}, 400, true, "enemyCollidable")
     return Enemy.new(
         scene,
         shooterSprite,
@@ -152,7 +152,7 @@ local harp = function(scene, xfunc)
     for i=-180,180,10 do
         table.insert(pattern, i)
     end
-    local factory = Projectile:newBulletFactory(scene"enemy-curtain", shooter_bullet, pattern, 300, true, "enemyBullet")
+    local factory = Projectile:newBulletFactory(scene"enemy-curtain", shooter_bullet, pattern, 300, true, "enemyCollidable")
     return Enemy.new(
         scene,
         harpSprite,
@@ -254,7 +254,7 @@ return function(scene)
         bgmusic = audio.stage1,
         bg = "assets/images/stage1finished.png",
         scenes = {
-            --[[coroutine.create(function(scene)
+            coroutine.create(function(scene)
                 am.wait(am.delay(0.5))
                 am.wait(show_dialogue(scene"dialoguearea", "Well, this is it.\nThis is... hell.", "Ava", "assets/images/expressions/neutral_A.png"))
                 am.wait(until_any_key())
@@ -316,7 +316,7 @@ return function(scene)
                 end
                 am.wait(am.delay(2))
                 scene:append(am.group():tag"continue")
-            end),]]
+            end),
             am.parallel{
                 coroutine.create(function(scene)
                     am.wait(am.delay(5))

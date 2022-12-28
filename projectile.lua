@@ -1,14 +1,8 @@
 local Projectile = ...
 
 local Enemy = require 'enemy'
-
-local Bump = require 'lib/bump'
-local bulletWorld = Bump.newWorld(64)
-
-function Projectile:checkBulletRect(x, y, w, h)
-    local items, len = bulletWorld:queryRect(x, y, w, h)
-    return items
-end
+local Physics = require 'physics'
+local splash = require 'lib/splash'
 
 function Projectile:shootAt(me, other, speed)
     local velocity = normalize(vec2(me, other)) * speed
@@ -22,19 +16,17 @@ function Projectile:newBullet(sprite, position, rotation, behavior, tagname)
     :tag(tagname)
     :action("action", function(node)
         local result = behavior(node)
-        if result ~= "removed" then
-            bulletWorld:update(node, node.position2d.x, node.position2d.y)
+        if result ~= "removed" and Physics.world.shapes[node] ~= nil then
+            Physics.world:update(node, node.position2d.x, node.position2d.y)
         end
     end) 
     ^ am.rotate(rotation) 
     ^ am.sprite(sprite)
-    bulletWorld:add(node, node.position2d.x, node.position2d.y, 1, 1)
+    Physics.world:add(node, splash.circle(node.position2d.x, node.position2d.y, 5))
+    function node:die(theater)
+        Physics.removeObject(node, theater)
+    end
     return node
-end
-
-function Projectile:removeBullet(curtain, node)
-    bulletWorld:remove(node)
-    curtain:remove(node)
 end
 
 function Projectile:newBulletFactory(curtain, sprite, angles, speed, shootPlayer, tagname)
@@ -53,9 +45,9 @@ function Projectile:newBulletFactory(curtain, sprite, angles, speed, shootPlayer
             end
             local velocity = vec2(math.cos(shootAngle), math.sin(shootAngle)) * speed
             curtain:append(Projectile:newBullet(sprite, position, shootAngle, function(node)
-                if node.position2d.x > screenEdge.x*2 or node.position2d.x < -screenEdge.x*2
-                    or node.position2d.y > screenEdge.y*2 or node.position2d.y < -screenEdge.y*2 then
-                    Projectile:removeBullet(curtain, node) -- may have to resolve where this happens, but i want it working
+                if (node.position2d.x > screenEdge.x*2 or node.position2d.x < -screenEdge.x*2
+                    or node.position2d.y > screenEdge.y*2 or node.position2d.y < -screenEdge.y*2) and Physics.world.shapes[node] ~= nil then
+                    Physics.removeObject(node, curtain) -- may have to resolve where this happens, but i want it working
                     return "removed" -- let behavior know to cancel
                 end
                 node.position2d = node.position2d + am.delta_time * velocity
@@ -64,19 +56,4 @@ function Projectile:newBulletFactory(curtain, sprite, angles, speed, shootPlayer
     end
     
     return factory
-end
-
-function Projectile.checkBullet(center, size, filter)
-    local items = Projectile:checkBulletRect(
-        center.x - size.x/2,
-        center.y + size.y/2,
-        size.x,
-        size.y
-    )
-    for _, item in ipairs(items) do
-        if #item:all(filter, false) > 0 then
-            return item
-        end
-    end
-    return nil
 end
